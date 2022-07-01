@@ -15,4 +15,6 @@ jobs:
         run: docker build . --file Dockerfile --tag ${{ github.event.repository.name }}:$(date +%s)
 
       - name: Build by Docker Compose
-        run: docker-compose build
+        run: |
+          touch telcheck.env
+          docker-compose build
