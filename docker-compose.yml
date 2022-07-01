@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  telcheck:
+    build: src/
+    volumes:
+      - data:/data
+    env_file:
+      - telcheck.env
+
+volumes:
+  data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/
