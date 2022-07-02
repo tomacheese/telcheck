@@ -4,14 +4,8 @@ services:
   telcheck:
     build: src/
     volumes:
-      - data:/data
+      - type: bind
+        source: ./data
+        target: /data
     env_file:
       - telcheck.env
-
-volumes:
-  data:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ./data/
