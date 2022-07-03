@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   telcheck:
-    build: src/
+    image: ghcr.io/tomacheese/telcheck:v1.0.0
     volumes:
       - type: bind
         source: ./data
