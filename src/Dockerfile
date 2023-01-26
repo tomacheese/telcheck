@@ -1,14 +1,17 @@
 FROM python:3-slim
 
-RUN apt-get update
-RUN apt-get upgrade -y
+RUN apt-get update && \
+  apt-get upgrade -y && \
+  apt-get clean && \
+  rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
 COPY requirements.txt .
-RUN pip install --upgrade pip
-RUN pip install --upgrade setuptools
-RUN pip install -r requirements.txt
+# hadolint ignore=DL3013
+RUN pip install --no-cache-dir --upgrade pip && \
+  pip install --no-cache-dir --upgrade setuptools && \
+  pip install --no-cache-dir -r requirements.txt
 
 COPY main.py .
 COPY entrypoint.sh .
