@@ -30,7 +30,9 @@ COPY --from=builder /app/output .
 
 ENV NODE_ENV=production
 ENV CONFIG_PATH=/data/config.json
-ENV NOTIFIED_PATH=/data/notified.json
+ENV CHECKED_PATH=/data/checked.json
+ENV PHONES_PATH=/data/phones.tsv
+ENV LOG_DIR=/data/logs/
 
 COPY entrypoint.sh .
 RUN chmod +x entrypoint.sh
