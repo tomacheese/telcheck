@@ -1,11 +1,11 @@
 version: '3.8'
 
 services:
-  telcheck:
-    image: ghcr.io/tomacheese/telcheck:v1.0.0
+  app:
+    build: .
     volumes:
       - type: bind
         source: ./data
         target: /data
-    env_file:
-      - telcheck.env
+    init: true
+    restart: always
