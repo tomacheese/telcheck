@@ -33,7 +33,7 @@ jobs:
     with:
       targets: >-
         [
-          { imageName: "tomacheese/telcheck", context: "src", file: "src/Dockerfile", packageName: "telcheck" }
+          { imageName: "tomacheese/telcheck", context: ".", file: "Dockerfile", packageName: "telcheck" }
         ]
     secrets:
       DOCKER_USERNAME: ${{ github.actor }}

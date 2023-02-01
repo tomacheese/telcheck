@@ -1,0 +1,280 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+        "Conditions": {
+            "properties": {
+                "callerNumber": {
+                    "type": "string"
+                },
+                "direction": {
+                    "type": "string"
+                },
+                "selfNumber": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "DestinationDiscordBot": {
+            "properties": {
+                "channel_id": {
+                    "description": "Discord channel ID",
+                    "type": "string"
+                },
+                "token": {
+                    "description": "Discord bot token",
+                    "type": "string"
+                },
+                "type": {
+                    "enum": [
+                        "discord-bot"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "channel_id",
+                "token",
+                "type"
+            ],
+            "type": "object"
+        },
+        "DestinationDiscordWebhook": {
+            "properties": {
+                "type": {
+                    "enum": [
+                        "discord-webhook"
+                    ],
+                    "type": "string"
+                },
+                "webhook_url": {
+                    "description": "Discord webhook URL",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "type",
+                "webhook_url"
+            ],
+            "type": "object"
+        },
+        "DestinationLINENotify": {
+            "properties": {
+                "token": {
+                    "description": "LINE Notify token",
+                    "type": "string"
+                },
+                "type": {
+                    "enum": [
+                        "line-notify"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "token",
+                "type"
+            ],
+            "type": "object"
+        },
+        "DestinationSlack": {
+            "properties": {
+                "type": {
+                    "enum": [
+                        "slack"
+                    ],
+                    "type": "string"
+                },
+                "webhook_url": {
+                    "description": "Slack webhook URL",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "type",
+                "webhook_url"
+            ],
+            "type": "object"
+        },
+        "IDestination": {
+            "anyOf": [
+                {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/DestinationDiscordWebhook"
+                        },
+                        {
+                            "properties": {
+                                "condition": {
+                                    "$ref": "#/definitions/Conditions",
+                                    "description": "Conditions for this destination (regex)"
+                                },
+                                "name": {
+                                    "description": "Destination name",
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "condition",
+                                "name"
+                            ],
+                            "type": "object"
+                        }
+                    ]
+                },
+                {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/DestinationDiscordBot"
+                        },
+                        {
+                            "properties": {
+                                "condition": {
+                                    "$ref": "#/definitions/Conditions",
+                                    "description": "Conditions for this destination (regex)"
+                                },
+                                "name": {
+                                    "description": "Destination name",
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "condition",
+                                "name"
+                            ],
+                            "type": "object"
+                        }
+                    ]
+                },
+                {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/DestinationSlack"
+                        },
+                        {
+                            "properties": {
+                                "condition": {
+                                    "$ref": "#/definitions/Conditions",
+                                    "description": "Conditions for this destination (regex)"
+                                },
+                                "name": {
+                                    "description": "Destination name",
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "condition",
+                                "name"
+                            ],
+                            "type": "object"
+                        }
+                    ]
+                },
+                {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/DestinationLINENotify"
+                        },
+                        {
+                            "properties": {
+                                "condition": {
+                                    "$ref": "#/definitions/Conditions",
+                                    "description": "Conditions for this destination (regex)"
+                                },
+                                "name": {
+                                    "description": "Destination name",
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "condition",
+                                "name"
+                            ],
+                            "type": "object"
+                        }
+                    ]
+                }
+            ]
+        },
+        "Self": {
+            "properties": {
+                "condition": {
+                    "$ref": "#/definitions/Conditions",
+                    "description": "Conditions for this self (regex)"
+                },
+                "name": {
+                    "description": "Self name",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "condition",
+                "name"
+            ],
+            "type": "object"
+        }
+    },
+    "properties": {
+        "destinations": {
+            "items": {
+                "$ref": "#/definitions/IDestination"
+            },
+            "type": "array"
+        },
+        "google_search": {
+            "properties": {
+                "cx": {
+                    "description": "Google Custom Search API CX",
+                    "type": "string"
+                },
+                "key": {
+                    "description": "Google Custom Search API key",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "cx",
+                "key"
+            ],
+            "type": "object"
+        },
+        "router": {
+            "properties": {
+                "ip": {
+                    "description": "Router IP address",
+                    "type": "string"
+                },
+                "password": {
+                    "description": "Router password",
+                    "type": "string"
+                },
+                "username": {
+                    "description": "Router username",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "ip",
+                "password",
+                "username"
+            ],
+            "type": "object"
+        },
+        "selfs": {
+            "items": {
+                "$ref": "#/definitions/Self"
+            },
+            "type": "array"
+        }
+    },
+    "required": [
+        "destinations",
+        "router",
+        "selfs"
+    ],
+    "type": "object"
+}
+
