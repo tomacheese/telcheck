@@ -15,7 +15,6 @@ import {
   PhoneDetailResult,
   searchNumber,
 } from './utils/search-number'
-// import { searchNumber } from './utils/search-number'
 
 function getDirectionText(direction: SyslogCall['direction']): string {
   switch (direction) {
@@ -128,7 +127,7 @@ function getGoogleSearchMessage(
 async function main() {
   const logger = Logger.configure('main')
   const config = loadConfig()
-  // const isFirst = Checked.isFirst()
+  const isFirst = Checked.isFirst()
 
   const nvr510 = new NVR510(
     config.router.ip,
@@ -191,7 +190,7 @@ async function main() {
           selfName
         )
 
-    if (destination) {
+    if (!isFirst && destination) {
       await destination.send(message)
     }
 
