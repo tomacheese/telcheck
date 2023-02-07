@@ -126,6 +126,7 @@ function getGoogleSearchMessage(
 
 async function main() {
   const logger = Logger.configure('main')
+  logger.info('✨ main()')
   const config = loadConfig()
   const isFirst = Checked.isFirst()
 
@@ -138,6 +139,9 @@ async function main() {
   const calls = await nvr510.getCallsFromSyslog()
   const filteredCalls = calls.filter(
     (call) => !Checked.isChecked(call.date, call.time)
+  )
+  logger.info(
+    `📞 calls: ${calls.length}, filteredCalls: ${filteredCalls.length}`
   )
   for (const call of filteredCalls) {
     const directionText = getDirectionText(call.direction)
