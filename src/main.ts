@@ -143,7 +143,7 @@ async function main() {
   logger.info(
     `📞 calls: ${calls.length}, filteredCalls: ${filteredCalls.length}`
   )
-  for (const call of filteredCalls) {
+  for (const call of filteredCalls.reverse()) {
     const directionText = getDirectionText(call.direction)
     const connectedText = getStatusText(call.status, call.direction)
 
