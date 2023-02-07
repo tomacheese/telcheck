@@ -18,7 +18,7 @@ export class Checked {
     }
     const previousDateObject = new Date(checked.datetime)
     const dateObject = this.convertDate(date, time)
-    return previousDateObject <= dateObject
+    return previousDateObject >= dateObject
   }
 
   public static check(date: string, time: string): void {
