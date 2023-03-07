@@ -6,7 +6,7 @@ import {
   loadConfig,
 } from './utils/config'
 import { getDestination } from './utils/destination'
-import { Logger } from './utils/logger'
+import { Logger } from '@book000/node-utils'
 import { NVR510, SyslogCall } from './utils/nvr510'
 import {
   GoogleSearchResult,

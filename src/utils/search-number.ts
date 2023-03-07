@@ -2,7 +2,7 @@ import axios from 'axios'
 import { load } from 'cheerio'
 import { Configuration, PATH } from './config'
 import fs from 'node:fs'
-import { Logger } from './logger'
+import { Logger } from '@book000/node-utils'
 
 interface PhoneDetail {
   name: string
