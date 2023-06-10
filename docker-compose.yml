@@ -7,6 +7,9 @@ services:
       - type: bind
         source: ./data
         target: /data
+      - type: bind
+        source: ./src/public
+        target: /app/public
     ports:
       - 8080:80
     init: true
