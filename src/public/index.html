@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>telcheck</title>
+    <link rel="manifest" href="/manifest.json" />
+  </head>
+  <body>
+    <select id="destination-name"></select>
+    <button id="subscribe">Subscribe</button>
+    <button id="unsubscribe">Unsubscribe</button>
+
+    <script src="script.js"></script>
+    <script>
+      if (window.navigator.serviceWorker !== undefined) {
+        window.navigator.serviceWorker.register('/sw.js')
+      }
+    </script>
+  </body>
+</html>

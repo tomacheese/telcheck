@@ -29,7 +29,7 @@ export class Checked {
   }
 
   private static convertDate(date: string, time: string): Date {
-    return new Date(`${date.replace(/\//g, '-')}T${time}+09:00`)
+    return new Date(`${date.replaceAll('/', '-')}T${time}+09:00`)
   }
 
   private static load(): IChecked | undefined {

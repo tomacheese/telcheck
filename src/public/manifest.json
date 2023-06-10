@@ -1,0 +1,7 @@
+{
+  "name": "telcheck",
+  "short_name": "telcheck",
+  "lang": "ja",
+  "display": "standalone",
+  "start_url": "/"
+}

@@ -72,10 +72,10 @@ export class NVR510 {
     // <br> も混ざっているので、<br> を削除する
     // 最初の行はヘッダーなので削除する
     const data = response.data
-      .replace(/&nbsp;/g, ' ')
-      .replace(/<br>/g, '')
-      .replace(/\r\n/g, '\r')
-      .replace(/\r/g, '\n')
+      .replaceAll('&nbsp;', ' ')
+      .replaceAll('<br>', '')
+      .replaceAll('\r\n', '\r')
+      .replaceAll('\r', '\n')
       .split('\n')
       .slice(1)
       .join('\r\n')

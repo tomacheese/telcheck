@@ -29,9 +29,7 @@
                     "type": "string"
                 },
                 "type": {
-                    "enum": [
-                        "discord-bot"
-                    ],
+                    "const": "discord-bot",
                     "type": "string"
                 }
             },
@@ -45,9 +43,7 @@
         "DestinationDiscordWebhook": {
             "properties": {
                 "type": {
-                    "enum": [
-                        "discord-webhook"
-                    ],
+                    "const": "discord-webhook",
                     "type": "string"
                 },
                 "webhook_url": {
@@ -68,9 +64,7 @@
                     "type": "string"
                 },
                 "type": {
-                    "enum": [
-                        "line-notify"
-                    ],
+                    "const": "line-notify",
                     "type": "string"
                 }
             },
@@ -83,9 +77,7 @@
         "DestinationSlack": {
             "properties": {
                 "type": {
-                    "enum": [
-                        "slack"
-                    ],
+                    "const": "slack",
                     "type": "string"
                 },
                 "webhook_url": {
@@ -96,6 +88,18 @@
             "required": [
                 "type",
                 "webhook_url"
+            ],
+            "type": "object"
+        },
+        "DestinationWebPush": {
+            "properties": {
+                "type": {
+                    "const": "web-push",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "type"
             ],
             "type": "object"
         },
@@ -196,6 +200,30 @@
                             "type": "object"
                         }
                     ]
+                },
+                {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/DestinationWebPush"
+                        },
+                        {
+                            "properties": {
+                                "condition": {
+                                    "$ref": "#/definitions/Conditions",
+                                    "description": "Conditions for this destination (regex)"
+                                },
+                                "name": {
+                                    "description": "Destination name",
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "condition",
+                                "name"
+                            ],
+                            "type": "object"
+                        }
+                    ]
                 }
             ]
         },
@@ -268,6 +296,32 @@
                 "$ref": "#/definitions/Self"
             },
             "type": "array"
+        },
+        "web": {
+            "properties": {
+                "auth": {
+                    "description": "Web server auth",
+                    "properties": {
+                        "password": {
+                            "description": "Web server auth password",
+                            "type": "string"
+                        },
+                        "username": {
+                            "description": "Web server auth username",
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "password",
+                        "username"
+                    ],
+                    "type": "object"
+                }
+            },
+            "required": [
+                "auth"
+            ],
+            "type": "object"
         }
     },
     "required": [

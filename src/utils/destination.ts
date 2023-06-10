@@ -5,7 +5,10 @@ import {
   isDestinationDiscordWebhook,
   isDestinationLINENotify,
   isDestinationSlack,
+  isDestinationWebPush,
 } from './config'
+import { WebPush } from './web-push'
+import { Logger } from '@book000/node-utils'
 
 class BaseDestination {
   public async send(message: string): Promise<void> {
@@ -95,6 +98,33 @@ class LINENotifyDestination extends BaseDestination {
   }
 }
 
+class WebPushDestination extends BaseDestination {
+  constructor(private readonly destinationName: string) {
+    super()
+  }
+
+  public async send(message: string): Promise<void> {
+    if (!message.includes('\n')) {
+      return
+    }
+
+    const rawTitle = message.split('\n')[0]
+    const rawBody = message.split('\n').slice(1).join('\n')
+    const title = rawTitle
+      .replaceAll('☎ ', '')
+      .replaceAll('**', '')
+      .replaceAll('`', '')
+      .trim()
+    const body = rawBody.replaceAll('**', '').replaceAll('`', '').trim()
+
+    Logger.configure('web-push').info(
+      `Sending web push notification: ${title} ${body}`
+    )
+    const webPush = WebPush.getInstance()
+    await webPush.sendNotifications(this.destinationName, title, body)
+  }
+}
+
 export function getDestination(destination: IDestination): BaseDestination {
   if (isDestinationDiscordWebhook(destination)) {
     return new DiscordWebhookDestination(destination.webhook_url)
@@ -107,6 +137,9 @@ export function getDestination(destination: IDestination): BaseDestination {
   }
   if (isDestinationLINENotify(destination)) {
     return new LINENotifyDestination(destination.token)
+  }
+  if (isDestinationWebPush(destination)) {
+    return new WebPushDestination(destination.name)
   }
   throw new Error(`Unknown destination: ${destination}`)
 }
