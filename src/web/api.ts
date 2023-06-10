@@ -25,7 +25,7 @@ export class ApiRouter extends BaseRouter {
 
   private routeGetVapidPublicKey() {
     return {
-      vapidPublicKey: this.webPush.getBase64PublicKey(),
+      public_key: this.webPush.getBase64PublicKey(),
     }
   }
 
