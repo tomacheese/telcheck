@@ -157,59 +157,72 @@ async function unsubscribe(destinationName) {
   return true
 }
 
-/** @type {HTMLButtonElement | null} */
-const subscribeButton = document.querySelector('#subscribe')
-/** @type {HTMLButtonElement | null} */
-const unsubscribeButton = document.querySelector('#unsubscribe')
-/** @type {HTMLSelectElement | null} */
-const destinationNameSelect = document.querySelector('#destination-name')
-/** @type {HTMLDivElement | null} */
-const modal = document.querySelector('#modal')
+function main() {
+  /** @type {HTMLButtonElement | null} */
+  const subscribeButton = document.querySelector('#subscribe')
+  /** @type {HTMLButtonElement | null} */
+  const unsubscribeButton = document.querySelector('#unsubscribe')
+  /** @type {HTMLSelectElement | null} */
+  const destinationNameSelect = document.querySelector('#destination-name')
+  /** @type {HTMLDivElement | null} */
+  const modal = document.querySelector('#modal')
+  /** @type {HTMLDivElement | null} */
+  const modalNotSupported = document.querySelector('#modal-not-supported')
 
-if (
-  subscribeButton == null ||
-  unsubscribeButton == null ||
-  destinationNameSelect == null ||
-  modal == null
-) {
-  throw new Error(
-    'subscribeButton, unsubscribeButton, destinationNameInput, modal is null'
-  )
+  if (
+    subscribeButton == null ||
+    unsubscribeButton == null ||
+    destinationNameSelect == null ||
+    modal == null ||
+    modalNotSupported == null
+  ) {
+    throw new Error(
+      'subscribeButton, unsubscribeButton, destinationNameInput, modal, modalNotSupported is null.'
+    )
+  }
+
+  if (!isWebPushSupported()) {
+    modalNotSupported.classList.add('is-active')
+    modal.classList.remove('is-active')
+    return
+  }
+
+  subscribeButton.disabled = true
+  unsubscribeButton.disabled = true
+  initDestinationNameSelect(destinationNameSelect).then(() => {
+    subscribeButton.disabled = false
+    unsubscribeButton.disabled = false
+
+    modal.classList.remove('is-active')
+  })
+
+  subscribeButton.addEventListener('click', async () => {
+    try {
+      const result = await subscribe(destinationNameSelect.value)
+      if (!result) {
+        alert('通知の購読に失敗しました')
+      }
+    } catch (error) {
+      console.error(error)
+      // @ts-ignore
+      alert(`通知の購読に失敗しました: ${error.message}`)
+    }
+  })
+
+  unsubscribeButton.addEventListener('click', async () => {
+    try {
+      const result = await unsubscribe()
+      if (result) {
+        alert('通知を解除しました')
+      } else {
+        alert('通知の解除に失敗しました')
+      }
+    } catch (error) {
+      console.error(error)
+      // @ts-ignore
+      alert(`通知の解除に失敗しました: ${error.message}`)
+    }
+  })
 }
 
-subscribeButton.disabled = true
-unsubscribeButton.disabled = true
-initDestinationNameSelect(destinationNameSelect).then(() => {
-  subscribeButton.disabled = false
-  unsubscribeButton.disabled = false
-
-  modal.classList.remove('is-active')
-})
-
-subscribeButton.addEventListener('click', async () => {
-  try {
-    const result = await subscribe(destinationNameSelect.value)
-    if (!result) {
-      alert('通知の購読に失敗しました')
-    }
-  } catch (error) {
-    console.error(error)
-    // @ts-ignore
-    alert(`通知の購読に失敗しました: ${error.message}`)
-  }
-})
-
-unsubscribeButton.addEventListener('click', async () => {
-  try {
-    const result = await unsubscribe()
-    if (result) {
-      alert('通知を解除しました')
-    } else {
-      alert('通知の解除に失敗しました')
-    }
-  } catch (error) {
-    console.error(error)
-    // @ts-ignore
-    alert(`通知の解除に失敗しました: ${error.message}`)
-  }
-})
+main()
