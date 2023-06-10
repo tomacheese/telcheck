@@ -15,7 +15,6 @@ COPY tsconfig.json .
 RUN yarn package
 
 FROM alpine:3 as version-getter
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 WORKDIR /app
 
@@ -26,7 +25,7 @@ RUN apk update && \
   apk upgrade && \
   apk add --update --no-cache jq && \
   rm -rf /var/cache/apk/* && \
-  jq -r '.version' package.json | tee version
+  jq -r '.version' package.json > version
 
 FROM node:18-alpine as runner
 
