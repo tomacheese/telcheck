@@ -8,7 +8,6 @@ import {
   isDestinationWebPush,
 } from './config'
 import { WebPush } from './web-push'
-import { Logger } from '@book000/node-utils'
 
 class BaseDestination {
   public async send(message: string): Promise<void> {
@@ -117,9 +116,6 @@ class WebPushDestination extends BaseDestination {
       .trim()
     const body = rawBody.replaceAll('**', '').replaceAll('`', '').trim()
 
-    Logger.configure('web-push').info(
-      `Sending web push notification: ${title} ${body}`
-    )
     const webPush = WebPush.getInstance()
     await webPush.sendNotifications(this.destinationName, title, body)
   }
