@@ -59,11 +59,11 @@ function getCallerName(callerResult: PhoneDetailResult) {
   return callerResult.name
 }
 
-function getIDestination(
+function getIDestinations(
   config: Configuration,
   detail: CallDetail
-): IDestination | null {
-  const destination = config.destinations.find((d) =>
+): IDestination[] | null {
+  const destination = config.destinations.filter((d) =>
     Object.entries(d.condition).every(
       // @ts-ignore
       ([key, value]) => new RegExp(value).test(detail[key])
@@ -168,10 +168,10 @@ async function checker(config: Configuration) {
       status: call.status,
     }
     const selfName = getSelfName(config, callDetail)
-    const destinationConfig = getIDestination(config, callDetail)
-    const destination = destinationConfig
-      ? getDestination(destinationConfig)
-      : null
+    const destinationConfigs = getIDestinations(config, callDetail)
+    const destinations = destinationConfigs
+      ? destinationConfigs.map((d) => getDestination(d))
+      : []
 
     const callerName = getCallerName(callerResult)
     const source = callerResult ? callerResult.source : '不明'
@@ -195,8 +195,8 @@ async function checker(config: Configuration) {
           selfName
         )
 
-    if (!isFirst && destination) {
-      await destination.send(message)
+    if (!isFirst && destinations.length > 0) {
+      await Promise.all(destinations.map((d) => d.send(message)))
     }
 
     Checked.check(call.date, call.time)

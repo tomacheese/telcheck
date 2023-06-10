@@ -131,6 +131,7 @@ export class WebPush {
     title: string,
     body: string
   ): Promise<void> {
+    const logger = Logger.configure('WebPush.sendNotifications')
     const subscriptions = this.getSubscriptions()
     const destinationSubscriptions = subscriptions.filter(
       (s) => s.destinationName === destinationName
@@ -144,9 +145,25 @@ export class WebPush {
       body,
     })
 
+    logger.info(
+      `Sending notification to ${destinationSubscriptions.length} subscriptions...`
+    )
     const promises = destinationSubscriptions.map((subscription) => {
       return this.sendNotification(subscription, payload)
     })
-    await Promise.all(promises)
+
+    const results = await Promise.all(promises)
+    logger.info(
+      `Successfully sent notification to ${
+        results.filter((r) => r === 201).length
+      } subscriptions!`
+    )
+    if (results.some((r) => r !== 201)) {
+      logger.warn(
+        `Failed to send notification to ${
+          results.filter((r) => r !== 201).length
+        } subscriptions.`
+      )
+    }
   }
 }
