@@ -70,10 +70,10 @@
       </div>
     </div>
 
-    <script src="script.js"></script>
+    <script src="script.js?{{VERSION}}"></script>
     <script>
       if (window.navigator.serviceWorker !== undefined) {
-        window.navigator.serviceWorker.register('/sw.js')
+        window.navigator.serviceWorker.register('/sw.js?{{VERSION}}');
       }
     </script>
   </body>

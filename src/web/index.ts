@@ -7,6 +7,7 @@ import { WebPush } from '@/utils/web-push'
 import { Logger } from '@book000/node-utils'
 import { ViewRouter } from './view'
 import fastifyBasicAuth from '@fastify/basic-auth'
+import fs from 'node:fs'
 
 export async function buildWebApp(config: Configuration, webPush: WebPush) {
   const logger = Logger.configure('buildWebApp')
@@ -33,10 +34,14 @@ export async function buildWebApp(config: Configuration, webPush: WebPush) {
     })
   }
 
+  const version = fs.existsSync('version')
+    ? fs.readFileSync('version').toString().trim()
+    : '0.0.0'
+
   // routers
   const routers: BaseRouter[] = [
-    new ApiRouter(app, config, webPush),
-    new ViewRouter(app, config, webPush),
+    new ApiRouter(app, config, webPush, version),
+    new ViewRouter(app, config, webPush, version),
   ]
 
   for (const router of routers) {
