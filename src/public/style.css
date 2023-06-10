@@ -66,7 +66,7 @@ main {
   width: 90%;
 }
 
-button {
+.buttons button {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -94,7 +94,7 @@ button#unsubscribe {
   color: #ff0000;
 }
 
-#modal {
+.modal {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -112,12 +112,12 @@ button#unsubscribe {
   visibility: hidden;
 }
 
-#modal.is-active {
+.modal.is-active {
   opacity: 1;
   visibility: visible;
 }
 
-.modal-content {
+.modal .modal-content {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -131,11 +131,11 @@ button#unsubscribe {
   font-size: 1em;
 }
 
-.modal-content h2 {
+.modal .modal-content h2 {
   margin-bottom: 1em;
 }
 
-.modal-content .modal-text {
+.modal .modal-text {
   margin-bottom: 1em;
 }
 

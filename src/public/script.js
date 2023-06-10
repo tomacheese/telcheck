@@ -162,6 +162,8 @@ function main() {
   const subscribeButton = document.querySelector('#subscribe')
   /** @type {HTMLButtonElement | null} */
   const unsubscribeButton = document.querySelector('#unsubscribe')
+  /** @type {HTMLButtonElement | null} */
+  const forceReloadButton = document.querySelector('#force-reload')
   /** @type {HTMLSelectElement | null} */
   const destinationNameSelect = document.querySelector('#destination-name')
   /** @type {HTMLDivElement | null} */
@@ -172,14 +174,18 @@ function main() {
   if (
     subscribeButton == null ||
     unsubscribeButton == null ||
+    forceReloadButton == null ||
     destinationNameSelect == null ||
     modal == null ||
     modalNotSupported == null
   ) {
-    throw new Error(
-      'subscribeButton, unsubscribeButton, destinationNameInput, modal, modalNotSupported is null.'
-    )
+    throw new Error('elements is null.')
   }
+
+  forceReloadButton.addEventListener('click', () => {
+    // @ts-ignore
+    window.location.reload(true)
+  })
 
   if (!isWebPushSupported()) {
     modalNotSupported.classList.add('is-active')
