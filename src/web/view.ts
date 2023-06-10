@@ -51,6 +51,15 @@ export class ViewRouter extends BaseRouter {
       json: 'application/json',
     }
     reply.header('Content-Type', contentTypes[extension] || 'text/plain')
+    if (extension === 'html') {
+      reply.send(
+        fs
+          .readFileSync(`./public/${path}`)
+          .toString()
+          .replaceAll('{{VERSION}}', this.version)
+      )
+      return
+    }
     reply.send(fs.readFileSync(`./public/${path}`))
   }
 }

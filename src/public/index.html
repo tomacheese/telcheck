@@ -47,6 +47,10 @@
       </div>
     </main>
 
+    <footer>
+      <p>tomacheese/telcheck v{{VERSION}}</p>
+    </footer>
+
     <div id="modal" class="modal is-active">
       <div class="modal-content">
         <h2 class="modal-title">403 Forbidden</h2>
@@ -70,10 +74,10 @@
       </div>
     </div>
 
-    <script src="script.js"></script>
+    <script src="script.js?{{VERSION}}"></script>
     <script>
       if (window.navigator.serviceWorker !== undefined) {
-        window.navigator.serviceWorker.register('/sw.js')
+        window.navigator.serviceWorker.register('/sw.js?{{VERSION}}')
       }
     </script>
   </body>

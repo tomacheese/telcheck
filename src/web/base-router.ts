@@ -9,15 +9,18 @@ export abstract class BaseRouter {
   protected fastify: FastifyInstance
   protected config: Configuration
   protected webPush: WebPush
+  protected version: string
 
   constructor(
     fastify: FastifyInstance,
     config: Configuration,
-    webPush: WebPush
+    webPush: WebPush,
+    version: string
   ) {
     this.fastify = fastify
     this.config = config
     this.webPush = webPush
+    this.version = version
   }
 
   /**
