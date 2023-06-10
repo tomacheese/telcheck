@@ -5,11 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>telcheck</title>
     <link rel="manifest" href="/manifest.json" />
+    <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <select id="destination-name"></select>
-    <button id="subscribe">Subscribe</button>
-    <button id="unsubscribe">Unsubscribe</button>
+    <main>
+      <div class="form">
+        <div class="destination">
+          <select id="destination-name"></select>
+        </div>
+
+        <div class="buttons">
+          <button id="subscribe">Subscribe</button>
+          <button id="unsubscribe">Unsubscribe</button>
+        </div>
+      </div>
+    </main>
+
+    <div id="modal" class="is-active">
+      <div class="modal-content">
+        <h2 class="modal-title">403 Forbidden</h2>
+        <p class="modal-text">認証が必要です。ブラウザの認証ウィンドウにて認証を行ってください。</p>
+      </div>
+    </div>
 
     <script src="script.js"></script>
     <script>

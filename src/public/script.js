@@ -163,13 +163,17 @@ const subscribeButton = document.querySelector('#subscribe')
 const unsubscribeButton = document.querySelector('#unsubscribe')
 /** @type {HTMLSelectElement | null} */
 const destinationNameSelect = document.querySelector('#destination-name')
+/** @type {HTMLDivElement | null} */
+const modal = document.querySelector('#modal')
+
 if (
   subscribeButton == null ||
   unsubscribeButton == null ||
-  destinationNameSelect == null
+  destinationNameSelect == null ||
+  modal == null
 ) {
   throw new Error(
-    'subscribeButton, unsubscribeButton, destinationNameInput is null'
+    'subscribeButton, unsubscribeButton, destinationNameInput, modal is null'
   )
 }
 
@@ -178,6 +182,8 @@ unsubscribeButton.disabled = true
 initDestinationNameSelect(destinationNameSelect).then(() => {
   subscribeButton.disabled = false
   unsubscribeButton.disabled = false
+
+  modal.classList.remove('is-active')
 })
 
 subscribeButton.addEventListener('click', async () => {

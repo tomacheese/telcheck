@@ -7,6 +7,9 @@ export class ApiRouter extends BaseRouter {
     this.fastify.register(
       (fastify, _, done) => {
         fastify
+          .get('/', this.routeGet.bind(this))
+          .addHook('onRequest', fastify.basicAuth)
+        fastify
           .get('/vapidPublicKey', this.routeGetVapidPublicKey.bind(this))
           .addHook('onRequest', fastify.basicAuth)
         fastify
@@ -22,6 +25,12 @@ export class ApiRouter extends BaseRouter {
       },
       { prefix: '/api' }
     )
+  }
+
+  private routeGet() {
+    return {
+      message: 'telcheck API',
+    }
   }
 
   private routeGetVapidPublicKey() {
