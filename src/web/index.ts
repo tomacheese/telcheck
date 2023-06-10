@@ -35,7 +35,7 @@ export async function buildWebApp(config: Configuration, webPush: WebPush) {
   }
 
   const version = fs.existsSync('version')
-    ? fs.readFileSync('version').toString().trim()
+    ? fs.readFileSync('version').toString().replace(/^v/, '').trim()
     : '0.0.0'
 
   // routers
