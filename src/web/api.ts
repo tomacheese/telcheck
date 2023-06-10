@@ -1,5 +1,6 @@
 import { FastifyReply, FastifyRequest } from 'fastify'
 import { BaseRouter } from './base-router'
+import { WebPushError } from 'web-push'
 
 export class ApiRouter extends BaseRouter {
   init(): void {
@@ -53,16 +54,34 @@ export class ApiRouter extends BaseRouter {
     reply: FastifyReply
   ) {
     const subscription = request.body
-    await this.webPush.addSubscription(subscription)
 
-    const statusCode = await this.webPush.sendNotification(
-      subscription,
-      JSON.stringify({
-        title: '購読完了',
-        body: `購読が完了しました。${subscription.destinationName} の通知をお届けします。`,
+    try {
+      const statusCode = await this.webPush.sendNotification(
+        subscription,
+        JSON.stringify({
+          title: '購読完了',
+          body: `購読が完了しました。${subscription.destinationName} の通知をお届けします。`,
+        })
+      )
+
+      await this.webPush.addSubscription(subscription)
+
+      reply.code(statusCode).send()
+    } catch (error) {
+      if (error instanceof WebPushError) {
+        reply.code(500).send({
+          message: error.message,
+          statusCode: error.statusCode,
+          headers: error.headers,
+          body: error.body,
+          endpoint: error.endpoint,
+        })
+        return
+      }
+      reply.code(500).send({
+        message: (error as Error).message,
       })
-    )
-    reply.code(statusCode).send()
+    }
   }
 
   private async routeDeleteSubscribe(
