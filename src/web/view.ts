@@ -5,13 +5,10 @@ import { Logger } from '@book000/node-utils'
 
 export class ViewRouter extends BaseRouter {
   init(): void {
-    this.fastify.register(
-      (fastify, _, done) => {
-        fastify.get('/:path', this.routeGet.bind(this))
-        done()
-      },
-      { prefix: '/' }
-    )
+    this.fastify.register((fastify, _, done) => {
+      fastify.get('/*', this.routeGet.bind(this))
+      done()
+    })
   }
 
   private routeGet(
@@ -20,7 +17,10 @@ export class ViewRouter extends BaseRouter {
     }>,
     reply: FastifyReply
   ) {
-    let path = request.params.path || ''
+    let path = request.url
+    if (path.includes('?')) {
+      path = path.split('?')[0]
+    }
     if (path === '') {
       path = 'index.html'
     }
@@ -47,6 +47,7 @@ export class ViewRouter extends BaseRouter {
       css: 'text/css',
       png: 'image/png',
       jpg: 'image/jpeg',
+      icon: 'image/x-icon',
       json: 'application/json',
     }
     reply.header('Content-Type', contentTypes[extension] || 'text/plain')

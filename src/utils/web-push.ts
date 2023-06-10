@@ -108,13 +108,18 @@ export class WebPush {
     subscription: Subscription,
     payload: string
   ): Promise<number> {
-    const response = await webpush.sendNotification(subscription, payload, {
-      vapidDetails: {
-        subject: 'mailto:' + process.env.WEB_PUSH_EMAIL,
-        publicKey: this.vapidPublicKey,
-        privateKey: this.vapidPrivateKey,
-      },
-    })
+    const response = await webpush
+      .sendNotification(subscription, payload, {
+        vapidDetails: {
+          subject: 'mailto:' + process.env.WEB_PUSH_EMAIL,
+          publicKey: this.vapidPublicKey,
+          privateKey: this.vapidPrivateKey,
+        },
+      })
+      .catch((error) => {
+        return error
+      })
+
     return response.statusCode
   }
 
