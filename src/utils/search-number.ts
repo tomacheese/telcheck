@@ -52,7 +52,10 @@ class Phones extends BaseSearchNumber {
     if (!fs.existsSync(PATH.PHONES_FILE)) {
       return null
     }
-    const tsv = fs.readFileSync(PATH.PHONES_FILE).toString().replace(/\r/g, '')
+    const tsv = fs
+      .readFileSync(PATH.PHONES_FILE)
+      .toString()
+      .replaceAll('\r', '')
     const phones = tsv.split('\n').map((line) => {
       const [name, number] = line.split('\t')
       return { name, number }
@@ -117,6 +120,10 @@ class GoogleSearch extends BaseSearchNumber {
     const response = await this.$axios.get(url)
     if (response.status !== 200) {
       throw new Error(`Failed to get google search: ${response.status}`)
+    }
+
+    if (!response.data.items) {
+      return null
     }
 
     const count = response.data.searchInformation.formattedTotalResults

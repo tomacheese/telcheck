@@ -1,4 +1,4 @@
-FROM node:20-alpine as builder
+FROM node:18-alpine as builder
 
 WORKDIR /app
 
@@ -14,7 +14,7 @@ COPY tsconfig.json .
 
 RUN yarn package
 
-FROM node:20-alpine as runner
+FROM node:18-alpine as runner
 
 # hadolint ignore=DL3018
 RUN apk update && \
@@ -27,12 +27,16 @@ RUN apk update && \
 WORKDIR /app
 
 COPY --from=builder /app/output .
+COPY src/public public
 
-ENV NODE_ENV=production
-ENV CONFIG_PATH=/data/config.json
-ENV CHECKED_PATH=/data/checked.json
-ENV PHONES_PATH=/data/phones.tsv
-ENV LOG_DIR=/data/logs/
+ENV NODE_ENV production
+ENV CONFIG_PATH /data/config.json
+ENV CHECKED_PATH /data/checked.json
+ENV PHONES_PATH /data/phones.tsv
+ENV WEB_PUSH_KEY_PATH /data/web-push-key.json
+ENV WEB_PUSH_SUBSCRIPTIONS_PATH /data/web-push-subscriptions.json
+ENV LOG_DIR /data/logs/
+ENV API_PORT 80
 
 COPY entrypoint.sh .
 RUN chmod +x entrypoint.sh

@@ -33,6 +33,10 @@ interface DestinationLINENotify {
   token: string
 }
 
+interface DestinationWebPush {
+  type: 'web-push'
+}
+
 export interface CallDetail {
   direction: SyslogCall['direction']
   selfNumber: string
@@ -49,6 +53,7 @@ export type IDestination = (
   | DestinationDiscordBot
   | DestinationSlack
   | DestinationLINENotify
+  | DestinationWebPush
 ) & {
   /** Destination name */
   name: string
@@ -80,6 +85,15 @@ export interface Configuration {
     /** Google Custom Search API CX */
     cx: string
   }
+  web?: {
+    /** Web server auth */
+    auth: {
+      /** Web server auth username */
+      username: string
+      /** Web server auth password */
+      password: string
+    }
+  }
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -99,7 +113,9 @@ function checkConfig(config: any): {
         return (
           isDestinationDiscordWebhook(destination) ||
           isDestinationDiscordBot(destination) ||
-          isDestinationSlack(destination)
+          isDestinationSlack(destination) ||
+          isDestinationLINENotify(destination) ||
+          isDestinationWebPush(destination)
         )
       }),
     'selfs is exists': !!config.selfs,
@@ -154,6 +170,12 @@ export const isDestinationLINENotify = (
   destination: any
 ): destination is DestinationLINENotify => {
   return destination.type === 'line-notify' && !!destination.token
+}
+
+export const isDestinationWebPush = (
+  destination: any
+): destination is DestinationWebPush => {
+  return destination.type === 'web-push'
 }
 
 export function loadConfig(): Configuration {

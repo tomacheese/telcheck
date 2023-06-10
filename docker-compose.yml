@@ -7,5 +7,7 @@ services:
       - type: bind
         source: ./data
         target: /data
+    ports:
+      - 8080:80
     init: true
     restart: always

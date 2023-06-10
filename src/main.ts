@@ -15,6 +15,8 @@ import {
   PhoneDetailResult,
   searchNumber,
 } from './utils/search-number'
+import { WebPush } from './utils/web-push'
+import { buildWebApp } from './web'
 
 function getDirectionText(direction: SyslogCall['direction']): string {
   switch (direction) {
@@ -124,10 +126,9 @@ function getGoogleSearchMessage(
   ].join('\n')
 }
 
-async function main() {
-  const logger = Logger.configure('main')
-  logger.info('✨ main()')
-  const config = loadConfig()
+async function checker(config: Configuration) {
+  const logger = Logger.configure('checker')
+  logger.info('✨ checker()')
   const isFirst = Checked.isFirst()
 
   const nvr510 = new NVR510(
@@ -200,6 +201,41 @@ async function main() {
 
     Checked.check(call.date, call.time)
   }
+}
+
+async function main() {
+  const logger = Logger.configure('main')
+  logger.info('✨ main()')
+
+  const config = loadConfig()
+  const webPush = WebPush.getInstance()
+
+  if (config.web) {
+    // start web server
+    logger.info('🚀 Start web server')
+    const app = await buildWebApp(config, webPush)
+    const host = process.env.API_HOST || '0.0.0.0'
+    const port = process.env.API_PORT
+      ? Number.parseInt(process.env.API_PORT, 10)
+      : 8000
+    app.listen({ host, port }, (error, address) => {
+      if (error) {
+        logger.error('❌ Fastify.listen error', error)
+      }
+      logger.info(`✅ API Server listening at ${address}`)
+    })
+  } else {
+    logger.info('🚫 Disabled web server')
+  }
+
+  logger.info('🔍 Start checking')
+  setInterval(() => {
+    checker(config)
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      .then(() => {})
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      .catch(() => {})
+  }, 1000)
 }
 
 ;(async () => {
