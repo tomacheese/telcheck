@@ -135,6 +135,6 @@ button#unsubscribe {
   margin-bottom: 1em;
 }
 
-.modal-content p {
+.modal-content .modal-text {
   margin-bottom: 1em;
 }
