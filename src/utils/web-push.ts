@@ -53,7 +53,7 @@ export class WebPush {
   }
 
   public getBase64PublicKey(): string {
-    return Buffer.from(this.vapidPublicKey).toString('base64')
+    return this.vapidPublicKey
   }
 
   public getVapidPrivateKey(): string {
