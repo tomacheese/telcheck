@@ -157,7 +157,7 @@ async function unsubscribe(destinationName) {
   return true
 }
 
-function main() {
+async function main() {
   /** @type {HTMLButtonElement | null} */
   const subscribeButton = document.querySelector('#subscribe')
   /** @type {HTMLButtonElement | null} */
@@ -187,7 +187,8 @@ function main() {
     window.location.reload(true)
   })
 
-  if (!isWebPushSupported()) {
+  const isSupported = await isWebPushSupported()
+  if (!isSupported) {
     modalNotSupported.classList.add('is-active')
     modal.classList.remove('is-active')
     return
