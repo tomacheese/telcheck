@@ -23,6 +23,11 @@ export class Checked {
 
   public static check(date: string, time: string): void {
     const dateObject = this.convertDate(date, time)
+    const previousChecked = Checked.load()
+    if (previousChecked && new Date(previousChecked.datetime) >= dateObject) {
+      return
+    }
+
     Checked.save({
       datetime: dateObject.toISOString(),
     })
