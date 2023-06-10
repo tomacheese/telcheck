@@ -35,6 +35,7 @@ ENV CHECKED_PATH /data/checked.json
 ENV PHONES_PATH /data/phones.tsv
 ENV WEB_PUSH_KEY_PATH /data/web-push-key.json
 ENV WEB_PUSH_SUBSCRIPTIONS_PATH /data/web-push-subscriptions.json
+ENV WEB_PUSH_EMAIL no-reply@example.com
 ENV LOG_DIR /data/logs/
 ENV API_PORT 80
 
