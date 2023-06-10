@@ -1,3 +1,4 @@
+import { Logger } from '@book000/node-utils'
 import fs from 'node:fs'
 import webpush from 'web-push'
 
@@ -108,6 +109,7 @@ export class WebPush {
     subscription: Subscription,
     payload: string
   ): Promise<number> {
+    const logger = Logger.configure('WebPush.sendNotification')
     const response = await webpush
       .sendNotification(subscription, payload, {
         vapidDetails: {
@@ -117,6 +119,7 @@ export class WebPush {
         },
       })
       .catch((error) => {
+        logger.error('Error sending notification', error)
         return error
       })
 

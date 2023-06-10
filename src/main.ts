@@ -144,10 +144,6 @@ async function checker(config: Configuration) {
   logger.info(
     `📞 calls: ${calls.length}, filteredCalls: ${filteredCalls.length}`
   )
-  const lastCall = filteredCalls.at(-1)
-  if (lastCall) {
-    Checked.check(lastCall.date, lastCall.time)
-  }
   for (const call of filteredCalls.reverse()) {
     const directionText = getDirectionText(call.direction)
     const connectedText = getStatusText(call.status, call.direction)
@@ -202,6 +198,8 @@ async function checker(config: Configuration) {
     if (!isFirst && destination) {
       await destination.send(message)
     }
+
+    Checked.check(call.date, call.time)
   }
 }
 
@@ -231,13 +229,15 @@ async function main() {
   }
 
   logger.info('🔍 Start checking')
-  setInterval(() => {
-    checker(config)
+
+  while (true) {
+    await checker(config)
       // eslint-disable-next-line @typescript-eslint/no-empty-function
       .then(() => {})
       // eslint-disable-next-line @typescript-eslint/no-empty-function
       .catch(() => {})
-  }, 1000)
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+  }
 }
 
 ;(async () => {
