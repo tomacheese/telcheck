@@ -52,7 +52,10 @@ class Phones extends BaseSearchNumber {
     if (!fs.existsSync(PATH.PHONES_FILE)) {
       return null
     }
-    const tsv = fs.readFileSync(PATH.PHONES_FILE).toString().replaceAll('\r', '')
+    const tsv = fs
+      .readFileSync(PATH.PHONES_FILE)
+      .toString()
+      .replaceAll('\r', '')
     const phones = tsv.split('\n').map((line) => {
       const [name, number] = line.split('\t')
       return { name, number }
