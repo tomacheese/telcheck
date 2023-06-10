@@ -54,19 +54,34 @@
     <div id="modal" class="modal is-active">
       <div class="modal-content">
         <h2 class="modal-title">403 Forbidden</h2>
-        <p class="modal-text">
-          認証が必要です。ブラウザの認証ウィンドウにて認証を行ってください。
-        </p>
+        <div class="modal-text">
+          <p>
+            認証が必要です。ブラウザの認証ウィンドウにて認証を行ってください。<br />
+            認証画面が表示されない場合は、<button id="force-reload">
+              こちら
+            </button>
+            をクリックしてください。
+          </p>
+        </div>
       </div>
     </div>
-
     <div id="modal-not-supported" class="modal">
       <div class="modal-content">
+        <h2 class="modal-title">通知機能に非対応のため利用不可</h2>
         <h2 class="modal-title">通知機能非対応</h2>
         <div class="modal-text">
           <p>お使いのブラウザは通知機能に対応していません。</p>
           <ul>
             <li>
+              本機能を利用できるのは、Google Chrome 42 (Android の場合 114)
+              以降、Microsoft Edge 17 以降、Mozilla Firefox 44 (Android の場合
+              113) 以降、Safari 16.4 以降です。<br />
+              詳しくは
+              <a href="https://caniuse.com/mdn-api_pushmanager">こちら</a>
+              をご覧ください。
+            </li>
+            <li>
+              iOS・iPadOSをご利用の場合は、Safariにて「ホーム画面に追加」してご利用ください。
               iOS・iPadOSをご利用の場合は、Safariかつホーム画面に追加してご利用ください。
             </li>
           </ul>
