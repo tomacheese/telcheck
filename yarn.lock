@@ -3199,7 +3199,7 @@ uri-js@^4.2.2:
   dependencies:
     punycode "^2.1.0"
 
-urlsafe-base64@^1.0.0, urlsafe-base64@~1.0.0:
+urlsafe-base64@~1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/urlsafe-base64/-/urlsafe-base64-1.0.0.tgz#23f89069a6c62f46cf3a1d3b00169cefb90be0c6"
   integrity sha512-RtuPeMy7c1UrHwproMZN9gN6kiZ0SvJwRaEzwZY0j9MypEkFqyBaKv176jvlPtg58Zh36bOkS0NFABXMHvvGCA==
@@ -3222,17 +3222,16 @@ validate-npm-package-license@^3.0.1:
     spdx-correct "^3.0.0"
     spdx-expression-parse "^3.0.0"
 
-web-push@3.6.1:
-  version "3.6.1"
-  resolved "https://registry.yarnpkg.com/web-push/-/web-push-3.6.1.tgz#a8145e2039a3764c8438156eb8fac6685db6f51a"
-  integrity sha512-+eN2/4Ybu+nkRgXqlPXUzqeA5BgQ7J4StYJM/e2uJpsSIGhkZJFrTlCx+ow9sD0mn+4jgbo2FkFoMBKftl49ZQ==
+web-push@3.6.2:
+  version "3.6.2"
+  resolved "https://registry.yarnpkg.com/web-push/-/web-push-3.6.2.tgz#15f3d648ce747f56a527ffa8bcacdfdd96fa1610"
+  integrity sha512-mqDSr+YAiee6URZwcJ2Qx2RPD7fo9hC/Ryj4rWN1TsvSDt29AEFuZ5/h5JjH+AgG4qk47t6JkRtfh8Dx4Kok/Q==
   dependencies:
     asn1.js "^5.3.0"
     http_ece "1.1.0"
     https-proxy-agent "^5.0.0"
     jws "^4.0.0"
     minimist "^1.2.5"
-    urlsafe-base64 "^1.0.0"
 
 which-boxed-primitive@^1.0.2:
   version "1.0.2"
