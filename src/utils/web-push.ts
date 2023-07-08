@@ -148,7 +148,9 @@ export class WebPush {
     const payload = JSON.stringify({
       title,
       body,
-      url: 'https://google.com/search?q=' + callNumber,
+      data: {
+        url: 'https://google.com/search?q=' + callNumber,
+      },
     })
 
     logger.info(
