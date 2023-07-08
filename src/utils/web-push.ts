@@ -142,7 +142,7 @@ export class WebPush {
 
     // 電話番号は半角カッコ内にある
     const regex = /\((\d+)\)/
-    const callNumberMatch = body.match(regex)
+    const callNumberMatch = title.match(regex)
     const callNumber = callNumberMatch ? callNumberMatch[1] : undefined
 
     const payload = JSON.stringify({
