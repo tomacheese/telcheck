@@ -43,6 +43,22 @@ class BaseSearchNumber {
   }
 }
 
+class AnonymousCall extends BaseSearchNumber {
+  constructor() {
+    super('非通知着信')
+  }
+
+  public async search(number: string): Promise<PhoneDetailResult> {
+    if (number === 'anonymous') {
+      return {
+        name: '非通知着信',
+        source: this.serviceName,
+      }
+    }
+    return null
+  }
+}
+
 class Phones extends BaseSearchNumber {
   constructor() {
     super('電話帳')
@@ -148,7 +164,12 @@ export async function searchNumber(
   number: string
 ): Promise<PhoneDetailResult> {
   const logger = Logger.configure('GoogleSearch::searchNumber')
-  const searchers = [new Phones(), new TelNavi(), new GoogleSearch(config)]
+  const searchers = [
+    new AnonymousCall(),
+    new Phones(),
+    new TelNavi(),
+    new GoogleSearch(config),
+  ]
   for (const searcher of searchers) {
     const result = await searcher.search(number).catch((error) => {
       logger.error('Failed to search number', error)
