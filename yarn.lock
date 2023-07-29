@@ -3443,10 +3443,10 @@ validate-npm-package-license@^3.0.1:
     spdx-correct "^3.0.0"
     spdx-expression-parse "^3.0.0"
 
-web-push@3.6.3:
-  version "3.6.3"
-  resolved "https://registry.yarnpkg.com/web-push/-/web-push-3.6.3.tgz#8a68509dcff70f74a2aeeed9dad5447c9414aa3d"
-  integrity sha512-3RlA0lRmLcwlHCRR94Tz+Fw6wPtm0lFm8oyukQunlEIarANxE84Ox9XBgF4+jNlXgO40DIwblOiC43oR46helA==
+web-push@3.6.4:
+  version "3.6.4"
+  resolved "https://registry.yarnpkg.com/web-push/-/web-push-3.6.4.tgz#3293a390d3058f1303a509668215306f9ea7c319"
+  integrity sha512-An4nhiYuCPJkD51hXid7OIO3TACJsSUhj6XWDNvCDiLCS5ucEkhPUnh/s+jOWAJUUDASGHkuU8hFHg+mX+4vLQ==
   dependencies:
     asn1.js "^5.3.0"
     http_ece "1.1.0"
