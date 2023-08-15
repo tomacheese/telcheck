@@ -61,7 +61,7 @@ export class NVR510 {
           username: this.username,
           password: this.password,
         },
-      }
+      },
     )
     if (response.status !== 200) {
       throw new Error(`Failed to get syslog: ${response.status}`)

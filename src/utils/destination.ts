@@ -12,7 +12,7 @@ import { WebPush } from './web-push'
 class BaseDestination {
   public async send(message: string): Promise<void> {
     throw new Error(
-      `Not implemented: ${this.constructor.name}.send() ${message}`
+      `Not implemented: ${this.constructor.name}.send() ${message}`,
     )
   }
 }
@@ -33,7 +33,7 @@ class DiscordWebhookDestination extends BaseDestination {
 class DiscordBotDestination extends BaseDestination {
   constructor(
     private readonly token: string,
-    private readonly channelId: string
+    private readonly channelId: string,
   ) {
     super()
   }
@@ -47,7 +47,7 @@ class DiscordBotDestination extends BaseDestination {
           Authorization: `Bot ${this.token}`,
         },
         validateStatus: () => true,
-      }
+      },
     )
     if (response.status !== 204 && response.status !== 200) {
       throw new Error(`Discord webhook failed (${response.status})`)
@@ -66,7 +66,7 @@ class SlackDestination extends BaseDestination {
       { text: message },
       {
         validateStatus: () => true,
-      }
+      },
     )
     if (response.status !== 200) {
       throw new Error(`Slack webhook failed (${response.status})`)
@@ -89,7 +89,7 @@ class LINENotifyDestination extends BaseDestination {
         headers: {
           Authorization: `Bearer ${this.token}`,
         },
-      }
+      },
     )
     if (response.status !== 200) {
       throw new Error(`LINE Notify failed (${response.status})`)

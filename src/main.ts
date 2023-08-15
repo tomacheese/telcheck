@@ -34,7 +34,7 @@ function getDirectionText(direction: SyslogCall['direction']): string {
 
 function getStatusText(
   status: SyslogCall['status'],
-  direction: SyslogCall['direction']
+  direction: SyslogCall['direction'],
 ): string {
   switch (status) {
     case 'connected': {
@@ -61,13 +61,13 @@ function getCallerName(callerResult: PhoneDetailResult) {
 
 function getIDestinations(
   config: Configuration,
-  detail: CallDetail
+  detail: CallDetail,
 ): IDestination[] | null {
   const destination = config.destinations.filter((d) =>
     Object.entries(d.condition).every(
       // @ts-ignore
-      ([key, value]) => new RegExp(value).test(detail[key])
-    )
+      ([key, value]) => new RegExp(value).test(detail[key]),
+    ),
   )
   if (destination) {
     return destination
@@ -79,8 +79,8 @@ function getSelfName(config: Configuration, detail: CallDetail): string {
   const self = config.selfs.find((d) =>
     Object.entries(d.condition).every(
       // @ts-ignore
-      ([key, value]) => new RegExp(value).test(detail[key])
-    )
+      ([key, value]) => new RegExp(value).test(detail[key]),
+    ),
   )
   if (self) {
     return self.name
@@ -94,7 +94,7 @@ function getNotGoogleSearchMessage(
   callerNumber: string,
   callerName: string,
   source: string,
-  selfName: string
+  selfName: string,
 ): string {
   return [
     `☎ **【${connectedText}】${directionText} \`${callerName}\` (\`${callerNumber}\`)**`,
@@ -111,10 +111,10 @@ function getGoogleSearchMessage(
   callerName: string,
   source: string,
   selfName: string,
-  googleResult: GoogleSearchResult
+  googleResult: GoogleSearchResult,
 ) {
   const googleResults = googleResult.items.map(
-    (item, index) => `#${index + 1} \`${item.title}\` ${item.url}`
+    (item, index) => `#${index + 1} \`${item.title}\` ${item.url}`,
   )
   return [
     `☎ **【${connectedText}】${directionText} \`${callerName}\` (\`${callerNumber}\`)**`,
@@ -134,22 +134,22 @@ async function checker(config: Configuration) {
   const nvr510 = new NVR510(
     config.router.ip,
     config.router.username,
-    config.router.password
+    config.router.password,
   )
 
   const calls = await nvr510.getCallsFromSyslog()
   const filteredCalls = calls.filter(
-    (call) => !Checked.isChecked(call.date, call.time)
+    (call) => !Checked.isChecked(call.date, call.time),
   )
   logger.info(
-    `📞 calls: ${calls.length}, filteredCalls: ${filteredCalls.length}`
+    `📞 calls: ${calls.length}, filteredCalls: ${filteredCalls.length}`,
   )
   for (const call of filteredCalls.reverse()) {
     const directionText = getDirectionText(call.direction)
     const connectedText = getStatusText(call.status, call.direction)
 
     logger.info(
-      `📞 ${directionText} ${call.fromNumber} -> ${call.toNumber} (${connectedText})`
+      `📞 ${directionText} ${call.fromNumber} -> ${call.toNumber} (${connectedText})`,
     )
 
     // 着信だったら、toNumber、発信だったら、fromNumber がこっち側の番号
@@ -184,7 +184,7 @@ async function checker(config: Configuration) {
           callerName,
           source,
           selfName,
-          callerResult
+          callerResult,
         )
       : getNotGoogleSearchMessage(
           connectedText,
@@ -192,7 +192,7 @@ async function checker(config: Configuration) {
           callerNumber,
           callerName,
           source,
-          selfName
+          selfName,
         )
 
     if (!isFirst && destinations.length > 0) {

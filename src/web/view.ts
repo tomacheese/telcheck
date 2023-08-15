@@ -15,7 +15,7 @@ export class ViewRouter extends BaseRouter {
     request: FastifyRequest<{
       Params: { path: string }
     }>,
-    reply: FastifyReply
+    reply: FastifyReply,
   ) {
     let path = request.url
     if (path.includes('?')) {
@@ -56,7 +56,7 @@ export class ViewRouter extends BaseRouter {
         fs
           .readFileSync(`./public/${path}`)
           .toString()
-          .replaceAll('{{VERSION}}', this.version)
+          .replaceAll('{{VERSION}}', this.version),
       )
       return
     }
