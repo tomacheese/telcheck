@@ -36,8 +36,8 @@ export class WebPush {
             vapid: vapidKeys,
           },
           null,
-          2
-        )
+          2,
+        ),
       )
     }
 
@@ -66,7 +66,7 @@ export class WebPush {
     const index = subscriptions.findIndex(
       (s) =>
         s.destinationName === subscription.destinationName &&
-        s.endpoint === subscription.endpoint
+        s.endpoint === subscription.endpoint,
     )
     if (index !== -1) {
       subscriptions.splice(index, 1)
@@ -76,11 +76,11 @@ export class WebPush {
   }
 
   public async removeSubscription(
-    subscription: Subscription
+    subscription: Subscription,
   ): Promise<boolean> {
     const subscriptions = this.getSubscriptions()
     const index = subscriptions.findIndex(
-      (s) => s.endpoint === subscription.endpoint
+      (s) => s.endpoint === subscription.endpoint,
     )
     if (index === -1) {
       return false
@@ -107,7 +107,7 @@ export class WebPush {
 
   public async sendNotification(
     subscription: Subscription,
-    payload: string
+    payload: string,
   ): Promise<number> {
     const logger = Logger.configure('WebPush.sendNotification')
     const response = await webpush
@@ -129,12 +129,12 @@ export class WebPush {
   public async sendNotifications(
     destinationName: string,
     title: string,
-    body: string
+    body: string,
   ): Promise<void> {
     const logger = Logger.configure('WebPush.sendNotifications')
     const subscriptions = this.getSubscriptions()
     const destinationSubscriptions = subscriptions.filter(
-      (s) => s.destinationName === destinationName
+      (s) => s.destinationName === destinationName,
     )
     if (destinationSubscriptions.length === 0) {
       return
@@ -154,7 +154,7 @@ export class WebPush {
     })
 
     logger.info(
-      `Sending notification to ${destinationSubscriptions.length} subscriptions...`
+      `Sending notification to ${destinationSubscriptions.length} subscriptions...`,
     )
     const promises = destinationSubscriptions.map((subscription) => {
       return this.sendNotification(subscription, payload)
@@ -164,13 +164,13 @@ export class WebPush {
     logger.info(
       `Successfully sent notification to ${
         results.filter((r) => r === 201).length
-      } subscriptions!`
+      } subscriptions!`,
     )
     if (results.some((r) => r !== 201)) {
       logger.warn(
         `Failed to send notification to ${
           results.filter((r) => r !== 201).length
-        } subscriptions.`
+        } subscriptions.`,
       )
     }
   }

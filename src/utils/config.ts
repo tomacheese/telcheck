@@ -145,13 +145,13 @@ const isConfig = (config: any): config is Configuration => {
 }
 
 export const isDestinationDiscordWebhook = (
-  destination: any
+  destination: any,
 ): destination is DestinationDiscordWebhook => {
   return destination.type === 'discord-webhook' && !!destination.webhook_url
 }
 
 export const isDestinationDiscordBot = (
-  destination: any
+  destination: any,
 ): destination is DestinationDiscordBot => {
   return (
     destination.type === 'discord-bot' &&
@@ -161,19 +161,19 @@ export const isDestinationDiscordBot = (
 }
 
 export const isDestinationSlack = (
-  destination: any
+  destination: any,
 ): destination is DestinationSlack => {
   return destination.type === 'slack' && !!destination.webhook_url
 }
 
 export const isDestinationLINENotify = (
-  destination: any
+  destination: any,
 ): destination is DestinationLINENotify => {
   return destination.type === 'line-notify' && !!destination.token
 }
 
 export const isDestinationWebPush = (
-  destination: any
+  destination: any,
 ): destination is DestinationWebPush => {
   return destination.type === 'web-push'
 }

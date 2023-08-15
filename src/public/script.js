@@ -81,7 +81,7 @@ async function subscribe(destinationName) {
       worker.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: validPublicKey,
-      })
+      }),
   )
 
   const subscriptionJSON = currentLocalSubscription.toJSON()

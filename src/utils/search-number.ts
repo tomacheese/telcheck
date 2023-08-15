@@ -161,7 +161,7 @@ class GoogleSearch extends BaseSearchNumber {
 
 export async function searchNumber(
   config: Configuration,
-  number: string
+  number: string,
 ): Promise<PhoneDetailResult> {
   const logger = Logger.configure('GoogleSearch::searchNumber')
   const searchers = [
@@ -183,13 +183,13 @@ export async function searchNumber(
 }
 
 export function isPhoneDetail(
-  result: PhoneDetailResult
+  result: PhoneDetailResult,
 ): result is PhoneDetail {
   return result !== null && 'name' in result
 }
 
 export function isGoogleSearchResult(
-  result: PhoneDetailResult
+  result: PhoneDetailResult,
 ): result is GoogleSearchResult {
   return result !== null && 'count' in result
 }

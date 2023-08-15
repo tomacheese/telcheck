@@ -23,7 +23,7 @@ export class ApiRouter extends BaseRouter {
           .addHook('onRequest', fastify.basicAuth)
         done()
       },
-      { prefix: '/api' }
+      { prefix: '/api' },
     )
   }
 
@@ -60,7 +60,7 @@ export class ApiRouter extends BaseRouter {
         }
       }
     }>,
-    reply: FastifyReply
+    reply: FastifyReply,
   ) {
     const subscription = request.body
 
@@ -70,7 +70,7 @@ export class ApiRouter extends BaseRouter {
         JSON.stringify({
           title: '購読完了',
           body: `購読が完了しました。${subscription.destinationName} の通知をお届けします。`,
-        })
+        }),
       )
 
       await this.webPush.addSubscription(subscription)
@@ -105,7 +105,7 @@ export class ApiRouter extends BaseRouter {
         }
       }
     }>,
-    reply: FastifyReply
+    reply: FastifyReply,
   ) {
     const subscription = request.body
     const result = await this.webPush.removeSubscription(subscription)
