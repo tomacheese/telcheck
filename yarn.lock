@@ -311,10 +311,10 @@
   resolved "https://registry.yarnpkg.com/@types/triple-beam/-/triple-beam-1.3.2.tgz#38ecb64f01aa0d02b7c8f4222d7c38af6316fef8"
   integrity sha512-txGIh+0eDFzKGC25zORnswy+br1Ha7hj5cMVwKIU7+s0U2AxxJru/jZSMU6OC9MJWP6+pc/hc6ZjyZShpsyY2g==
 
-"@types/web-push@3.6.1":
-  version "3.6.1"
-  resolved "https://registry.yarnpkg.com/@types/web-push/-/web-push-3.6.1.tgz#ade10d5a92932749bc08b33aba9c797b0526beea"
-  integrity sha512-Zu6Iju7c4IlE8I8eEeFLYRb7XFqvHFmWWAYr1cmug9EX3c6CDarxIXWN/GO0sxjbJLkHPwozUzp6cLdXsrq7Ew==
+"@types/web-push@3.6.2":
+  version "3.6.2"
+  resolved "https://registry.yarnpkg.com/@types/web-push/-/web-push-3.6.2.tgz#bce102ea82e0e8a0ffd204ed810b1c5f8cad5bf9"
+  integrity sha512-v6Wdk1eIVbAJQjEAa1ZxuG3cfOYTd6nSv55BVJMtLQUvQ07v80MPt2Voq/z71WKhy4CORu4L3aH+8SXKX4BD5g==
   dependencies:
     "@types/node" "*"
 
