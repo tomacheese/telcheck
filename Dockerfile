@@ -1,4 +1,4 @@
-FROM node:20-alpine as builder
+FROM node:21-alpine as builder
 
 WORKDIR /app
 
@@ -27,7 +27,7 @@ RUN apk update && \
   rm -rf /var/cache/apk/* && \
   jq -r '.version' package.json > version
 
-FROM node:20-alpine as runner
+FROM node:21-alpine as runner
 
 # hadolint ignore=DL3018
 RUN apk update && \
