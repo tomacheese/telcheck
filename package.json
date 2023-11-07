@@ -28,7 +28,7 @@
     "@book000/node-utils": "1.8.6",
     "@fastify/basic-auth": "5.1.0",
     "@fastify/cors": "8.4.1",
-    "@types/cheerio": "0.22.33",
+    "@types/cheerio": "0.22.34",
     "@types/node": "20.8.10",
     "@types/web-push": "3.6.2",
     "@typescript-eslint/eslint-plugin": "6.10.0",
