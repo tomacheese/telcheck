@@ -141,10 +141,10 @@
     ajv-formats "^2.1.1"
     fast-uri "^2.0.0"
 
-"@fastify/basic-auth@5.1.0":
-  version "5.1.0"
-  resolved "https://registry.yarnpkg.com/@fastify/basic-auth/-/basic-auth-5.1.0.tgz#356ebe0caf35107abbad70ba748d35283a25343f"
-  integrity sha512-oZYuI9EJQMdor1fZybb/sqV5zxbux2pSV7LK6Tj+Y/ZM1fuwK9jFYxNSur4tbTiJ+oFjDtbVvKaNBiSzqLaqdw==
+"@fastify/basic-auth@5.1.1":
+  version "5.1.1"
+  resolved "https://registry.yarnpkg.com/@fastify/basic-auth/-/basic-auth-5.1.1.tgz#ff93d787bbbbd93b126550b797e1c416628c0a49"
+  integrity sha512-L4b7EK5LKZnV6fdH1+rQbjhkKGXjCfiKJ0JkdGHZQPBMHMiXDZF8xbZsCakWGf9c7jDXJicP3FPcIXUPBkuSeQ==
   dependencies:
     "@fastify/error" "^3.0.0"
     fastify-plugin "^4.0.0"
