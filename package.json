@@ -27,7 +27,7 @@
   "devDependencies": {
     "@book000/node-utils": "1.11.7",
     "@fastify/basic-auth": "5.1.1",
-    "@fastify/cors": "8.4.1",
+    "@fastify/cors": "8.4.2",
     "@types/cheerio": "0.22.35",
     "@types/node": "20.10.3",
     "@types/web-push": "3.6.3",
