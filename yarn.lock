@@ -25,10 +25,10 @@
     js-tokens "^4.0.0"
     picocolors "^1.0.0"
 
-"@book000/node-utils@1.13.42":
-  version "1.13.42"
-  resolved "https://registry.yarnpkg.com/@book000/node-utils/-/node-utils-1.13.42.tgz#0892120023d699080096f8044aaa7f0b43fadd29"
-  integrity sha512-5nb7qnalyhcYDfQ/8NM5HmGhdY0V5UOiT2wTMthSkYqWeVpGyL5Pc62y+W2dlJC516bCMHXFVV70SPwO8SYt0g==
+"@book000/node-utils@1.13.44":
+  version "1.13.44"
+  resolved "https://registry.yarnpkg.com/@book000/node-utils/-/node-utils-1.13.44.tgz#515e107d9cdce5aec13de2e5208d1959c48e3c51"
+  integrity sha512-vw0vAR68cUwI1gmNEzE6AaV0O5RTeUaO2IhaFa/Wkc1Usx8J4peTfoqind88ndbutkUEqjjC5pglvA5tv6CmKA==
   dependencies:
     axios "1.6.8"
     cycle "1.0.3"
