@@ -4,18 +4,18 @@ import fs from 'node:fs'
 import { Logger } from '@book000/node-utils'
 
 export class ViewRouter extends BaseRouter {
-  init(): void {
-    this.fastify.register((fastify, _, done) => {
+  async init(): Promise<void> {
+    await this.fastify.register((fastify, _, done) => {
       fastify.get('/*', this.routeGet.bind(this))
       done()
     })
   }
 
-  private routeGet(
+  private async routeGet(
     request: FastifyRequest<{
       Params: { path: string }
     }>,
-    reply: FastifyReply,
+    reply: FastifyReply
   ) {
     let path = request.url
     if (path.includes('?')) {
@@ -25,7 +25,7 @@ export class ViewRouter extends BaseRouter {
       path = 'index.html'
     }
     if (path.includes('..')) {
-      reply.code(404).send()
+      await reply.code(404).send()
       return
     }
     if (path.endsWith('/')) {
@@ -34,14 +34,12 @@ export class ViewRouter extends BaseRouter {
     const logger = Logger.configure('routeGet')
     logger.info(`⏩ Serving file: ${path}`)
     if (!fs.existsSync(`./public/${path}`)) {
-      reply.code(404).send()
+      await reply.code(404).send()
       return
     }
 
-    const extension = path.split('.').pop() || ''
-    const contentTypes: {
-      [key: string]: string
-    } = {
+    const extension = path.split('.').pop() ?? ''
+    const contentTypes: Record<string, string> = {
       html: 'text/html',
       js: 'text/javascript',
       css: 'text/css',
@@ -50,16 +48,16 @@ export class ViewRouter extends BaseRouter {
       icon: 'image/x-icon',
       json: 'application/json',
     }
-    reply.header('Content-Type', contentTypes[extension] || 'text/plain')
+    await reply.header('Content-Type', contentTypes[extension] || 'text/plain')
     if (extension === 'html') {
-      reply.send(
+      await reply.send(
         fs
           .readFileSync(`./public/${path}`)
           .toString()
-          .replaceAll('{{VERSION}}', this.version),
+          .replaceAll('{{VERSION}}', this.version)
       )
       return
     }
-    reply.send(fs.readFileSync(`./public/${path}`))
+    await reply.send(fs.readFileSync(`./public/${path}`))
   }
 }

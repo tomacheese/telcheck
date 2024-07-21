@@ -52,16 +52,16 @@ export class NVR510 {
     this.password = password
   }
 
-  public async getDashboardSyslog(): Promise<any> {
+  public async getDashboardSyslog(): Promise<SyslogItem[]> {
     // http://192.168.0.1/dashboard/syslog_data.csv?num=100
-    const response = await axios.get(
+    const response = await axios.get<string>(
       `http://${this.ip}/dashboard/syslog_data.csv?num=100`,
       {
         auth: {
           username: this.username,
           password: this.password,
         },
-      },
+      }
     )
     if (response.status !== 200) {
       throw new Error(`Failed to get syslog: ${response.status}`)
@@ -84,7 +84,7 @@ export class NVR510 {
 
   public async getCallsFromSyslog(): Promise<SyslogCall[]> {
     const syslog = await this.getDashboardSyslog()
-    const calls: any[] = []
+    const calls: SyslogCall[] = []
     for (const item of syslog) {
       const matchOut = this.sipCallToMessageRegex.exec(item.message)
       if (matchOut) {
@@ -92,10 +92,10 @@ export class NVR510 {
           date: item.date,
           time: item.time,
           direction: 'outgoing',
-          from: matchOut.groups?.from || '',
-          fromNumber: this.sip2number(matchOut.groups?.from),
-          to: matchOut.groups?.to || '',
-          toNumber: this.sip2number(matchOut.groups?.to),
+          from: matchOut.groups?.from ?? '',
+          fromNumber: this.sip2number(matchOut.groups?.from) ?? '',
+          to: matchOut.groups?.to ?? '',
+          toNumber: this.sip2number(matchOut.groups?.to) ?? '',
           status: this.getStatus(matchOut.groups?.status),
         })
       }
@@ -105,10 +105,10 @@ export class NVR510 {
           date: item.date,
           time: item.time,
           direction: 'incoming',
-          from: matchIn.groups?.from || '',
-          fromNumber: this.sip2number(matchIn.groups?.from),
-          to: matchIn.groups?.to || '',
-          toNumber: this.sip2number(matchIn.groups?.to),
+          from: matchIn.groups?.from ?? '',
+          fromNumber: this.sip2number(matchIn.groups?.from) ?? '',
+          to: matchIn.groups?.to ?? '',
+          toNumber: this.sip2number(matchIn.groups?.to) ?? '',
           status: this.getStatus(matchIn.groups?.status),
         })
       }
@@ -116,7 +116,9 @@ export class NVR510 {
     return calls
   }
 
-  private getStatus(statusRaw: string | undefined): string | undefined {
+  private getStatus(
+    statusRaw: string | undefined
+  ): 'connecting' | 'connected' | 'disconnected' {
     if (!statusRaw) {
       return 'connecting'
     }
@@ -146,9 +148,9 @@ export class NVR510 {
           items.push(item)
         }
         item = {
-          date: match.groups?.date || '',
-          time: match.groups?.time || '',
-          message: match.groups?.message || '',
+          date: match.groups?.date ?? '',
+          time: match.groups?.time ?? '',
+          message: match.groups?.message ?? '',
         }
       } else if (item) {
         item.message += '\n' + line

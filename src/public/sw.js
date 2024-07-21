@@ -1,4 +1,4 @@
-/* eslint-disable no-console */
+/* eslint-disable unicorn/no-null */
 /* global self, clients */
 
 self.addEventListener('push', (event) => {
@@ -11,7 +11,7 @@ self.addEventListener('push', (event) => {
       return
     }
 
-    // @ts-ignore
+    // @ts-expect-error event.data is not null
     const payload = event.data?.json() ?? null
     const title = payload?.title ?? 'Title'
     const tag = payload?.tag ?? ''
@@ -19,7 +19,7 @@ self.addEventListener('push', (event) => {
     const icon = payload?.icon ?? '/phone.png'
     const data = payload?.data ?? null
 
-    // @ts-ignore
+    // @ts-expect-error self.registration is not null
     self.registration.showNotification(title, {
       body,
       tag,
@@ -33,9 +33,9 @@ self.addEventListener('push', (event) => {
 
 self.addEventListener('notificationclick', (event) => {
   try {
-    // @ts-ignore
+    // @ts-expect-error event.notification is not null
     event.notification.close()
-    // @ts-ignore
+    // @ts-expect-error event.notification is not null
     clients.openWindow(event.notification.data?.url ?? '/')
   } catch (error) {
     console.error(error)

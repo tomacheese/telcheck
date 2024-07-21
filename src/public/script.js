@@ -1,4 +1,4 @@
-/* eslint-disable no-console */
+/* eslint-disable unicorn/no-null */
 /* global alert */
 
 async function isWebPushSupported() {
@@ -81,11 +81,14 @@ async function subscribe(destinationName) {
       worker.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: validPublicKey,
-      }),
+      })
   )
 
   const subscriptionJSON = currentLocalSubscription.toJSON()
-  if (subscriptionJSON.endpoint == null || subscriptionJSON.keys == null) {
+  if (
+    subscriptionJSON.endpoint === null ||
+    subscriptionJSON.keys === undefined
+  ) {
     throw new Error('Subscription endpoint or keys are missing.')
   }
 
@@ -183,7 +186,7 @@ async function main() {
   }
 
   forceReloadButton.addEventListener('click', () => {
-    // @ts-ignore
+    // @ts-expect-error reload argument is not in the spec
     window.location.reload(true)
   })
 
@@ -211,7 +214,7 @@ async function main() {
       }
     } catch (error) {
       console.error(error)
-      // @ts-ignore
+      // @ts-expect-error error.message is not null
       alert(`通知の購読に失敗しました: ${error.message}`)
     }
   })
@@ -226,10 +229,18 @@ async function main() {
       }
     } catch (error) {
       console.error(error)
-      // @ts-ignore
+      // @ts-expect-error error.message is not null
       alert(`通知の解除に失敗しました: ${error.message}`)
     }
   })
 }
 
-main()
+// eslint-disable-next-line unicorn/prefer-top-level-await
+;(async () => {
+  try {
+    await main()
+  } catch (error) {
+    console.error(error)
+    alert('エラーが発生しました')
+  }
+})()

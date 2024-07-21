@@ -20,13 +20,14 @@ export interface Subscription {
 }
 
 export class WebPush {
-  private static instance: any
+  // eslint-disable-next-line no-use-before-define
+  private static instance: WebPush | null = null
 
   public readonly vapidPublicKey: string
   private readonly vapidPrivateKey: string
 
   private constructor() {
-    const keyPath = process.env.WEB_PUSH_KEY_PATH || 'data/web-push-key.json'
+    const keyPath = process.env.WEB_PUSH_KEY_PATH ?? 'data/web-push-key.json'
     if (!fs.existsSync(keyPath)) {
       const vapidKeys = webpush.generateVAPIDKeys()
       fs.writeFileSync(
@@ -36,8 +37,8 @@ export class WebPush {
             vapid: vapidKeys,
           },
           null,
-          2,
-        ),
+          2
+        )
       )
     }
 
@@ -61,12 +62,12 @@ export class WebPush {
     return this.vapidPrivateKey
   }
 
-  public async addSubscription(subscription: Subscription): Promise<void> {
+  public addSubscription(subscription: Subscription): void {
     const subscriptions = this.getSubscriptions()
     const index = subscriptions.findIndex(
       (s) =>
         s.destinationName === subscription.destinationName &&
-        s.endpoint === subscription.endpoint,
+        s.endpoint === subscription.endpoint
     )
     if (index !== -1) {
       subscriptions.splice(index, 1)
@@ -75,12 +76,10 @@ export class WebPush {
     this.saveSubscriptions(subscriptions)
   }
 
-  public async removeSubscription(
-    subscription: Subscription,
-  ): Promise<boolean> {
+  public removeSubscription(subscription: Subscription): boolean {
     const subscriptions = this.getSubscriptions()
     const index = subscriptions.findIndex(
-      (s) => s.endpoint === subscription.endpoint,
+      (s) => s.endpoint === subscription.endpoint
     )
     if (index === -1) {
       return false
@@ -92,36 +91,41 @@ export class WebPush {
 
   public getSubscriptions(): Subscription[] {
     const subscriptionsPath =
-      process.env.WEB_PUSH_SUBSCRIPTIONS_PATH || 'data/subscriptions.json'
+      process.env.WEB_PUSH_SUBSCRIPTIONS_PATH ?? 'data/subscriptions.json'
     if (!fs.existsSync(subscriptionsPath)) {
       return []
     }
-    return JSON.parse(fs.readFileSync(subscriptionsPath, 'utf8'))
+    return JSON.parse(
+      fs.readFileSync(subscriptionsPath, 'utf8')
+    ) as Subscription[]
   }
 
   private saveSubscriptions(subscriptions: Subscription[]): void {
     const subscriptionsPath =
-      process.env.WEB_PUSH_SUBSCRIPTIONS_PATH || 'data/subscriptions.json'
+      process.env.WEB_PUSH_SUBSCRIPTIONS_PATH ?? 'data/subscriptions.json'
     fs.writeFileSync(subscriptionsPath, JSON.stringify(subscriptions, null, 2))
   }
 
   public async sendNotification(
     subscription: Subscription,
-    payload: string,
+    payload: string
   ): Promise<number> {
     const logger = Logger.configure('WebPush.sendNotification')
     const response = await webpush
       .sendNotification(subscription, payload, {
         vapidDetails: {
-          subject: 'mailto:' + process.env.WEB_PUSH_EMAIL,
+          subject: `mailto:${process.env.WEB_PUSH_EMAIL}`,
           publicKey: this.vapidPublicKey,
           privateKey: this.vapidPrivateKey,
         },
       })
-      .catch((error) => {
-        logger.error('Error sending notification', error)
-        return error
+      .catch((error: unknown) => {
+        logger.error('Error sending notification', error as Error)
       })
+
+    if (!response) {
+      return 500
+    }
 
     return response.statusCode
   }
@@ -129,12 +133,12 @@ export class WebPush {
   public async sendNotifications(
     destinationName: string,
     title: string,
-    body: string,
+    body: string
   ): Promise<void> {
     const logger = Logger.configure('WebPush.sendNotifications')
     const subscriptions = this.getSubscriptions()
     const destinationSubscriptions = subscriptions.filter(
-      (s) => s.destinationName === destinationName,
+      (s) => s.destinationName === destinationName
     )
     if (destinationSubscriptions.length === 0) {
       return
@@ -149,12 +153,12 @@ export class WebPush {
       title,
       body,
       data: {
-        url: 'https://google.com/search?q=' + callNumber,
+        url: `https://google.com/search?q=${callNumber}`,
       },
     })
 
     logger.info(
-      `Sending notification to ${destinationSubscriptions.length} subscriptions...`,
+      `Sending notification to ${destinationSubscriptions.length} subscriptions...`
     )
     const promises = destinationSubscriptions.map((subscription) => {
       return this.sendNotification(subscription, payload)
@@ -164,13 +168,13 @@ export class WebPush {
     logger.info(
       `Successfully sent notification to ${
         results.filter((r) => r === 201).length
-      } subscriptions!`,
+      } subscriptions!`
     )
     if (results.some((r) => r !== 201)) {
       logger.warn(
         `Failed to send notification to ${
           results.filter((r) => r !== 201).length
-        } subscriptions.`,
+        } subscriptions.`
       )
     }
   }

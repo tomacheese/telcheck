@@ -9,8 +9,19 @@ interface PhoneDetail {
   source: string
 }
 
+interface GoogleCustomSearchResponse {
+  searchInformation: {
+    formattedTotalResults: string
+  }
+  items?: {
+    title: string
+    link: string
+    snippet: string
+  }[]
+}
+
 export interface GoogleSearchResult {
-  count: number
+  count: string
   items: {
     title: string
     url: string
@@ -38,7 +49,7 @@ class BaseSearchNumber {
     })
   }
 
-  public async search(number: string): Promise<PhoneDetailResult> {
+  public search(number: string): Promise<PhoneDetailResult> {
     throw new Error(`Not implemented: ${number}@${this.serviceName}`)
   }
 }
@@ -48,14 +59,14 @@ class AnonymousCall extends BaseSearchNumber {
     super('非通知着信')
   }
 
-  public async search(number: string): Promise<PhoneDetailResult> {
+  public search(number: string): Promise<PhoneDetailResult> {
     if (number === 'anonymous') {
-      return {
+      return Promise.resolve({
         name: '非通知着信',
         source: this.serviceName,
-      }
+      })
     }
-    return null
+    return Promise.resolve(null)
   }
 }
 
@@ -64,9 +75,9 @@ class Phones extends BaseSearchNumber {
     super('電話帳')
   }
 
-  public async search(number: string): Promise<PhoneDetailResult> {
+  public search(number: string): Promise<PhoneDetailResult> {
     if (!fs.existsSync(PATH.PHONES_FILE)) {
-      return null
+      return Promise.resolve(null)
     }
     const tsv = fs
       .readFileSync(PATH.PHONES_FILE)
@@ -78,12 +89,12 @@ class Phones extends BaseSearchNumber {
     })
     const result = phones.find((phone) => phone.number === number)
     if (result) {
-      return {
+      return Promise.resolve({
         name: result.name,
         source: this.serviceName,
-      }
+      })
     }
-    return null
+    return Promise.resolve(null)
   }
 }
 
@@ -133,7 +144,7 @@ class GoogleSearch extends BaseSearchNumber {
     const searchCx = this.config.google_search.cx
 
     const url = `https://www.googleapis.com/customsearch/v1?key=${searchKey}&cx=${searchCx}&lr=lang_ja&q="${number}"`
-    const response = await this.$axios.get(url)
+    const response = await this.$axios.get<GoogleCustomSearchResponse>(url)
     if (response.status !== 200) {
       throw new Error(`Failed to get google search: ${response.status}`)
     }
@@ -161,7 +172,7 @@ class GoogleSearch extends BaseSearchNumber {
 
 export async function searchNumber(
   config: Configuration,
-  number: string,
+  number: string
 ): Promise<PhoneDetailResult> {
   const logger = Logger.configure('GoogleSearch::searchNumber')
   const searchers = [
@@ -171,8 +182,8 @@ export async function searchNumber(
     new GoogleSearch(config),
   ]
   for (const searcher of searchers) {
-    const result = await searcher.search(number).catch((error) => {
-      logger.error('Failed to search number', error)
+    const result = await searcher.search(number).catch((error: unknown) => {
+      logger.error('Failed to search number', error as Error)
       return null
     })
     if (result) {
@@ -183,13 +194,13 @@ export async function searchNumber(
 }
 
 export function isPhoneDetail(
-  result: PhoneDetailResult,
+  result: PhoneDetailResult
 ): result is PhoneDetail {
   return result !== null && 'name' in result
 }
 
 export function isGoogleSearchResult(
-  result: PhoneDetailResult,
+  result: PhoneDetailResult
 ): result is GoogleSearchResult {
   return result !== null && 'count' in result
 }

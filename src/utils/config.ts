@@ -1,10 +1,12 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import fs from 'node:fs'
 import { SyslogCall } from './nvr510'
 
 export const PATH = {
-  CONFIG_FILE: process.env.CONFIG_PATH || 'data/config.json',
-  CHECKED_FILE: process.env.CHECKED_PATH || 'data/checked.json',
-  PHONES_FILE: process.env.PHONES_PATH || 'data/phones.tsv',
+  CONFIG_FILE: process.env.CONFIG_PATH ?? 'data/config.json',
+  CHECKED_FILE: process.env.CHECKED_PATH ?? 'data/checked.json',
+  PHONES_FILE: process.env.PHONES_PATH ?? 'data/phones.tsv',
 }
 
 interface DestinationDiscordWebhook {
@@ -96,10 +98,7 @@ export interface Configuration {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function checkConfig(config: any): {
-  [key: string]: boolean
-} {
+function checkConfig(config: any): Record<string, boolean> {
   const results = {
     'config is object': typeof config === 'object',
     'destinations is exists': !!config.destinations,
@@ -139,19 +138,18 @@ function checkConfig(config: any): {
   return results
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const isConfig = (config: any): config is Configuration => {
   return Object.values(checkConfig(config)).every(Boolean)
 }
 
 export const isDestinationDiscordWebhook = (
-  destination: any,
+  destination: any
 ): destination is DestinationDiscordWebhook => {
   return destination.type === 'discord-webhook' && !!destination.webhook_url
 }
 
 export const isDestinationDiscordBot = (
-  destination: any,
+  destination: any
 ): destination is DestinationDiscordBot => {
   return (
     destination.type === 'discord-bot' &&
@@ -161,19 +159,19 @@ export const isDestinationDiscordBot = (
 }
 
 export const isDestinationSlack = (
-  destination: any,
+  destination: any
 ): destination is DestinationSlack => {
   return destination.type === 'slack' && !!destination.webhook_url
 }
 
 export const isDestinationLINENotify = (
-  destination: any,
+  destination: any
 ): destination is DestinationLINENotify => {
   return destination.type === 'line-notify' && !!destination.token
 }
 
 export const isDestinationWebPush = (
-  destination: any,
+  destination: any
 ): destination is DestinationWebPush => {
   return destination.type === 'web-push'
 }

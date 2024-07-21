@@ -3,8 +3,8 @@ import { BaseRouter } from './base-router'
 import { WebPushError } from 'web-push'
 
 export class ApiRouter extends BaseRouter {
-  init(): void {
-    this.fastify.register(
+  async init(): Promise<void> {
+    await this.fastify.register(
       (fastify, _, done) => {
         fastify
           .get('/', this.routeGet.bind(this))
@@ -23,7 +23,7 @@ export class ApiRouter extends BaseRouter {
           .addHook('onRequest', fastify.basicAuth)
         done()
       },
-      { prefix: '/api' },
+      { prefix: '/api' }
     )
   }
 
@@ -60,7 +60,7 @@ export class ApiRouter extends BaseRouter {
         }
       }
     }>,
-    reply: FastifyReply,
+    reply: FastifyReply
   ) {
     const subscription = request.body
 
@@ -70,15 +70,15 @@ export class ApiRouter extends BaseRouter {
         JSON.stringify({
           title: '購読完了',
           body: `購読が完了しました。${subscription.destinationName} の通知をお届けします。`,
-        }),
+        })
       )
 
-      await this.webPush.addSubscription(subscription)
+      this.webPush.addSubscription(subscription)
 
-      reply.code(statusCode).send()
+      await reply.code(statusCode).send()
     } catch (error) {
       if (error instanceof WebPushError) {
-        reply.code(500).send({
+        await reply.code(500).send({
           message: error.message,
           statusCode: error.statusCode,
           headers: error.headers,
@@ -87,7 +87,7 @@ export class ApiRouter extends BaseRouter {
         })
         return
       }
-      reply.code(500).send({
+      await reply.code(500).send({
         message: (error as Error).message,
       })
     }
@@ -105,10 +105,10 @@ export class ApiRouter extends BaseRouter {
         }
       }
     }>,
-    reply: FastifyReply,
+    reply: FastifyReply
   ) {
     const subscription = request.body
-    const result = await this.webPush.removeSubscription(subscription)
-    reply.code(result ? 200 : 404).send()
+    const result = this.webPush.removeSubscription(subscription)
+    await reply.code(result ? 200 : 404).send()
   }
 }

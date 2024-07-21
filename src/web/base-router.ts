@@ -15,7 +15,7 @@ export abstract class BaseRouter {
     fastify: FastifyInstance,
     config: Configuration,
     webPush: WebPush,
-    version: string,
+    version: string
   ) {
     this.fastify = fastify
     this.config = config
@@ -28,5 +28,5 @@ export abstract class BaseRouter {
    *
    * this.fastify.register() でルーターを登録する
    */
-  abstract init(): void
+  abstract init(): Promise<void>
 }
