@@ -42,7 +42,7 @@ export class Checked {
       return
     }
     const json = fs.readFileSync(PATH.CHECKED_FILE).toString()
-    return JSON.parse(json)
+    return JSON.parse(json) as IChecked
   }
 
   private static save(checked: IChecked): void {
