@@ -12,8 +12,8 @@ importers:
         specifier: 1.7.24
         version: 1.7.24(eslint-config-standard@17.1.0(eslint-plugin-import@2.29.1(@typescript-eslint/parser@7.17.0(eslint@9.7.0)(typescript@5.5.4))(eslint@9.7.0))(eslint-plugin-n@17.9.0(eslint@9.7.0))(eslint-plugin-promise@7.0.0(eslint@9.7.0))(eslint@9.7.0))(eslint@9.7.0)(typescript@5.5.4)
       '@book000/node-utils':
-        specifier: 1.13.187
-        version: 1.13.187
+        specifier: 1.13.189
+        version: 1.13.189
       '@fastify/basic-auth':
         specifier: 5.1.1
         version: 5.1.1
@@ -92,8 +92,8 @@ packages:
       eslint: 9.7.0
       eslint-config-standard: 17.1.0
 
-  '@book000/node-utils@1.13.187':
-    resolution: {integrity: sha512-3SbZtoK/bfhxe711ot7WduQqCgef+DFG8neZ/agsnDLzIVjkIyPYpVV89yLsOJ72QUkyx9gGQlSYb3J+1mCAsA==}
+  '@book000/node-utils@1.13.189':
+    resolution: {integrity: sha512-Gmm5MHcNGgvo7EWcTKqVHdZYx7hHFEis/79Sf2W32g1sutLUBqnqivTydvqz1+MUu/xIV3utIY1sjOAk5vqk8Q==}
 
   '@colors/colors@1.6.0':
     resolution: {integrity: sha512-Ir+AOibqzrIsL6ajt3Rz3LskB7OiMVHqltZmspbW/TJuTVuyOMirVqAkjfY6JISiLHgyNqicAC8AyHHGzNd/dA==}
@@ -2065,7 +2065,7 @@ snapshots:
       - supports-color
       - typescript
 
-  '@book000/node-utils@1.13.187':
+  '@book000/node-utils@1.13.189':
     dependencies:
       axios: 1.7.2
       cycle: 1.0.3
