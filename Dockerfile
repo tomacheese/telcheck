@@ -1,4 +1,4 @@
-FROM alpine:3 as version-getter
+FROM alpine:3 AS version-getter
 
 WORKDIR /app
 
@@ -11,7 +11,7 @@ RUN apk update && \
   rm -rf /var/cache/apk/* && \
   jq -r '.version' package.json > version
 
-FROM node:21-alpine as runner
+FROM node:21-alpine AS runner
 
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME/bin:$PATH"
@@ -36,15 +36,15 @@ COPY src src
 
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile --offline
 
-ENV NODE_ENV production
-ENV CONFIG_PATH /data/config.json
-ENV CHECKED_PATH /data/checked.json
-ENV PHONES_PATH /data/phones.tsv
-ENV WEB_PUSH_KEY_PATH /data/web-push-key.json
-ENV WEB_PUSH_SUBSCRIPTIONS_PATH /data/web-push-subscriptions.json
-ENV WEB_PUSH_EMAIL no-reply@example.com
-ENV LOG_DIR /data/logs/
-ENV API_PORT 80
+ENV NODE_ENV=production
+ENV CONFIG_PATH=/data/config.json
+ENV CHECKED_PATH=/data/checked.json
+ENV PHONES_PATH=/data/phones.tsv
+ENV WEB_PUSH_KEY_PATH=/data/web-push-key.json
+ENV WEB_PUSH_SUBSCRIPTIONS_PATH=/data/web-push-subscriptions.json
+ENV WEB_PUSH_EMAIL=no-reply@example.com
+ENV LOG_DIR=/data/logs/
+ENV API_PORT=80
 
 COPY entrypoint.sh .
 RUN chmod +x entrypoint.sh
