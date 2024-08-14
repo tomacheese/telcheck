@@ -50,5 +50,5 @@
     "typescript-json-schema": "0.64.0",
     "web-push": "3.6.7"
   },
-  "packageManager": "pnpm@9.7.0"
+  "packageManager": "pnpm@9.7.1"
 }
