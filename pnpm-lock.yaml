@@ -27,8 +27,8 @@ importers:
         specifier: 20.16.14
         version: 20.16.14
       '@types/web-push':
-        specifier: 3.6.3
-        version: 3.6.3
+        specifier: 3.6.4
+        version: 3.6.4
       axios:
         specifier: 1.7.7
         version: 1.7.7
@@ -379,8 +379,8 @@ packages:
   '@types/triple-beam@1.3.5':
     resolution: {integrity: sha512-6WaYesThRMCl19iryMYP7/x2OVgCtbIVflDGFpWnb9irXI3UjYE4AzmYuiUKY1AJstGijoY+MgUszMgRxIYTYw==}
 
-  '@types/web-push@3.6.3':
-    resolution: {integrity: sha512-v3oT4mMJsHeJ/rraliZ+7TbZtr5bQQuxcgD7C3/1q/zkAj29c8RE0F9lVZVu3hiQe5Z9fYcBreV7TLnfKR+4mg==}
+  '@types/web-push@3.6.4':
+    resolution: {integrity: sha512-GnJmSr40H3RAnj0s34FNTcJi1hmWFV5KXugE0mYWnYhgTAHLJ/dJKAwDmvPJYMke0RplY2XE9LnM4hqSqKIjhQ==}
 
   '@typescript-eslint/eslint-plugin@8.11.0':
     resolution: {integrity: sha512-KhGn2LjW1PJT2A/GfDpiyOfS4a8xHQv2myUagTM5+zsormOmBlYsnQ6pobJ8XxJmh6hnHwa2Mbe3fPrDJoDhbA==}
@@ -2314,7 +2314,7 @@ snapshots:
 
   '@types/triple-beam@1.3.5': {}
 
-  '@types/web-push@3.6.3':
+  '@types/web-push@3.6.4':
     dependencies:
       '@types/node': 20.16.14
 
