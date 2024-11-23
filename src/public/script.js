@@ -3,7 +3,7 @@
 
 async function isWebPushSupported() {
   // グローバル空間にNotificationがあればNotification APIに対応しているとみなす
-  if (!('Notification' in window)) {
+  if (!('Notification' in globalThis)) {
     return false
   }
   // グローバル変数navigatorにserviceWorkerプロパティがあればサービスワーカーに対応しているとみなす
@@ -66,13 +66,13 @@ async function subscribe(destinationName) {
   }
   const validPublicKey = await getVapidPublicKey()
 
-  if (window.Notification.permission === 'default') {
-    const result = await window.Notification.requestPermission()
+  if (globalThis.Notification.permission === 'default') {
+    const result = await globalThis.Notification.requestPermission()
     if (result === 'default') {
       throw new Error('Permission prompt dismissed.')
     }
   }
-  if (window.Notification.permission === 'denied') {
+  if (globalThis.Notification.permission === 'denied') {
     throw new Error('Permission denied.')
   }
 
@@ -187,7 +187,7 @@ async function main() {
 
   forceReloadButton.addEventListener('click', () => {
     // @ts-expect-error reload argument is not in the spec
-    window.location.reload(true)
+    globalThis.location.reload(true)
   })
 
   const isSupported = await isWebPushSupported()

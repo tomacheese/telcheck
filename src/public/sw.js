@@ -4,8 +4,8 @@
 self.addEventListener('push', (event) => {
   try {
     if (
-      self.Notification == null ||
-      self.Notification.permission !== 'granted'
+      globalThis.Notification == null ||
+      globalThis.Notification.permission !== 'granted'
     ) {
       console.debug('notification is disabled.')
       return
@@ -20,7 +20,7 @@ self.addEventListener('push', (event) => {
     const data = payload?.data ?? null
 
     // @ts-expect-error self.registration is not null
-    self.registration.showNotification(title, {
+    globalThis.registration.showNotification(title, {
       body,
       tag,
       icon,
