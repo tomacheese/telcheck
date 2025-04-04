@@ -24,8 +24,8 @@ importers:
         specifier: 0.22.35
         version: 0.22.35
       '@types/node':
-        specifier: 22.13.14
-        version: 22.13.14
+        specifier: 22.13.15
+        version: 22.13.15
       '@types/web-push':
         specifier: 3.6.4
         version: 3.6.4
@@ -390,8 +390,8 @@ packages:
   '@types/node@18.19.84':
     resolution: {integrity: sha512-ACYy2HGcZPHxEeWTqowTF7dhXN+JU1o7Gr4b41klnn6pj2LD6rsiGqSZojMdk1Jh2ys3m76ap+ae1vvE4+5+vg==}
 
-  '@types/node@22.13.14':
-    resolution: {integrity: sha512-Zs/Ollc1SJ8nKUAgc7ivOEdIBM8JAKgrqqUYi2J997JuKO7/tpQC+WCetQ1sypiKCQWHdvdg9wBNpUPEWZae7w==}
+  '@types/node@22.13.15':
+    resolution: {integrity: sha512-imAbQEEbVni6i6h6Bd5xkCRwLqFc8hihCsi2GbtDoAtUcAFQ6Zs4pFXTZUUbroTkXdImczWM9AI8eZUuybXE3w==}
 
   '@types/normalize-package-data@2.4.4':
     resolution: {integrity: sha512-37i+OaWTh9qeK4LSHPsyRC7NahnGotNuZvjLSgcPzblpHB3rrCJxAOgI5gCdKm7coonsaX1Of0ILiTcnZjbfxA==}
@@ -2361,7 +2361,7 @@ snapshots:
 
   '@types/cheerio@0.22.35':
     dependencies:
-      '@types/node': 22.13.14
+      '@types/node': 22.13.15
 
   '@types/estree@1.0.7': {}
 
@@ -2373,7 +2373,7 @@ snapshots:
     dependencies:
       undici-types: 5.26.5
 
-  '@types/node@22.13.14':
+  '@types/node@22.13.15':
     dependencies:
       undici-types: 6.20.0
 
@@ -2383,7 +2383,7 @@ snapshots:
 
   '@types/web-push@3.6.4':
     dependencies:
-      '@types/node': 22.13.14
+      '@types/node': 22.13.15
 
   '@typescript-eslint/eslint-plugin@8.24.0(@typescript-eslint/parser@8.24.0(eslint@9.23.0)(typescript@5.8.2))(eslint@9.23.0)(typescript@5.8.2)':
     dependencies:
