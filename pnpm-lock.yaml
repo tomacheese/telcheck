@@ -15,8 +15,8 @@ importers:
         specifier: 1.14.73
         version: 1.14.73
       '@fastify/basic-auth':
-        specifier: 6.0.3
-        version: 6.0.3
+        specifier: 6.1.0
+        version: 6.1.0
       '@fastify/cors':
         specifier: 11.0.1
         version: 11.0.1
@@ -301,8 +301,8 @@ packages:
   '@fastify/ajv-compiler@4.0.2':
     resolution: {integrity: sha512-Rkiu/8wIjpsf46Rr+Fitd3HRP+VsxUFDDeag0hs9L0ksfnwx2g7SPQQTFL0E8Qv+rfXzQOxBJnjUB9ITUDjfWQ==}
 
-  '@fastify/basic-auth@6.0.3':
-    resolution: {integrity: sha512-1uFhStk9zFAQQgSdbGVK2BMSEOPyKQ+lPLLkbto8gpqYqISmXLtvD1jz8/5ibf2Q7jI6+Ns4WdKmRQjI8FYiyA==}
+  '@fastify/basic-auth@6.1.0':
+    resolution: {integrity: sha512-66yA8LpWLUZjCYX5vn6yxtoCG33McFapbUdiVIXqRoTednWGMo4q3xWvYbw91y5leevP0JkM0EjsipMASyPrBQ==}
 
   '@fastify/cors@11.0.1':
     resolution: {integrity: sha512-dmZaE7M1f4SM8ZZuk5RhSsDJ+ezTgI7v3HHRj8Ow9CneczsPLZV6+2j2uwdaSLn8zhTv6QV0F4ZRcqdalGx1pQ==}
@@ -2299,7 +2299,7 @@ snapshots:
       ajv-formats: 3.0.1(ajv@8.17.1)
       fast-uri: 3.0.6
 
-  '@fastify/basic-auth@6.0.3':
+  '@fastify/basic-auth@6.1.0':
     dependencies:
       '@fastify/error': 4.1.0
       fastify-plugin: 5.0.1
