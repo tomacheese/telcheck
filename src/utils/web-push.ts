@@ -20,7 +20,6 @@ export interface Subscription {
 }
 
 export class WebPush {
-  // eslint-disable-next-line no-use-before-define
   private static instance: WebPush | null = null
 
   public readonly vapidPublicKey: string
@@ -48,9 +47,7 @@ export class WebPush {
   }
 
   public static getInstance(): WebPush {
-    if (!WebPush.instance) {
-      WebPush.instance = new WebPush()
-    }
+    WebPush.instance ??= new WebPush()
     return WebPush.instance
   }
 

@@ -98,6 +98,40 @@ export interface Configuration {
   }
 }
 
+export const isDestinationDiscordWebhook = (
+  destination: any
+): destination is DestinationDiscordWebhook => {
+  return destination.type === 'discord-webhook' && !!destination.webhook_url
+}
+
+export const isDestinationDiscordBot = (
+  destination: any
+): destination is DestinationDiscordBot => {
+  return (
+    destination.type === 'discord-bot' &&
+    !!destination.token &&
+    !!destination.channel_id
+  )
+}
+
+export const isDestinationSlack = (
+  destination: any
+): destination is DestinationSlack => {
+  return destination.type === 'slack' && !!destination.webhook_url
+}
+
+export const isDestinationLINENotify = (
+  destination: any
+): destination is DestinationLINENotify => {
+  return destination.type === 'line-notify' && !!destination.token
+}
+
+export const isDestinationWebPush = (
+  destination: any
+): destination is DestinationWebPush => {
+  return destination.type === 'web-push'
+}
+
 function checkConfig(config: any): Record<string, boolean> {
   const results = {
     'config is object': typeof config === 'object',
@@ -140,40 +174,6 @@ function checkConfig(config: any): Record<string, boolean> {
 
 const isConfig = (config: any): config is Configuration => {
   return Object.values(checkConfig(config)).every(Boolean)
-}
-
-export const isDestinationDiscordWebhook = (
-  destination: any
-): destination is DestinationDiscordWebhook => {
-  return destination.type === 'discord-webhook' && !!destination.webhook_url
-}
-
-export const isDestinationDiscordBot = (
-  destination: any
-): destination is DestinationDiscordBot => {
-  return (
-    destination.type === 'discord-bot' &&
-    !!destination.token &&
-    !!destination.channel_id
-  )
-}
-
-export const isDestinationSlack = (
-  destination: any
-): destination is DestinationSlack => {
-  return destination.type === 'slack' && !!destination.webhook_url
-}
-
-export const isDestinationLINENotify = (
-  destination: any
-): destination is DestinationLINENotify => {
-  return destination.type === 'line-notify' && !!destination.token
-}
-
-export const isDestinationWebPush = (
-  destination: any
-): destination is DestinationWebPush => {
-  return destination.type === 'web-push'
 }
 
 export function loadConfig(): Configuration {
