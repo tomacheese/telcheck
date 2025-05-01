@@ -29,7 +29,7 @@
   },
   "devDependencies": {
     "@book000/eslint-config": "1.8.61",
-    "@book000/node-utils": "1.15.0",
+    "@book000/node-utils": "1.15.1",
     "@fastify/basic-auth": "6.2.0",
     "@fastify/cors": "11.0.1",
     "@types/cheerio": "0.22.35",
