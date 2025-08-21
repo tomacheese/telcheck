@@ -142,7 +142,7 @@ async function checker(config: Configuration) {
   logger.info(
     `📞 calls: ${calls.length}, filteredCalls: ${filteredCalls.length}`
   )
-  for (const call of filteredCalls.reverse()) {
+  for (const call of filteredCalls.toReversed()) {
     const directionText = getDirectionText(call.direction)
     const connectedText = getStatusText(call.status, call.direction)
 
