@@ -28,7 +28,7 @@
     "fix": "run-z fix:prettier,fix:eslint"
   },
   "devDependencies": {
-    "@book000/eslint-config": "1.9.31",
+    "@book000/eslint-config": "1.10.12",
     "@book000/node-utils": "1.18.112",
     "@fastify/basic-auth": "6.2.0",
     "@fastify/cors": "11.1.0",
@@ -39,9 +39,6 @@
     "cheerio": "1.1.2",
     "eslint": "9.33.0",
     "eslint-config-standard": "17.1.0",
-    "eslint-plugin-import": "2.32.0",
-    "eslint-plugin-n": "17.21.3",
-    "eslint-plugin-promise": "7.2.1",
     "fastify": "5.5.0",
     "prettier": "3.6.2",
     "run-z": "2.1.0",
