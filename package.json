@@ -33,7 +33,7 @@
     "@fastify/basic-auth": "6.2.0",
     "@fastify/cors": "11.1.0",
     "@types/cheerio": "1.0.0",
-    "@types/node": "24.7.2",
+    "@types/node": "24.8.0",
     "@types/web-push": "3.6.4",
     "axios": "1.12.2",
     "cheerio": "1.1.2",
