@@ -28,7 +28,7 @@
     "fix": "run-z fix:prettier,fix:eslint"
   },
   "devDependencies": {
-    "@book000/eslint-config": "1.11.7",
+    "@book000/eslint-config": "1.11.8",
     "@book000/node-utils": "1.18.136",
     "@fastify/basic-auth": "6.2.0",
     "@fastify/cors": "11.1.0",
