@@ -11,7 +11,7 @@ RUN apk update && \
   rm -rf /var/cache/apk/* && \
   jq -r '.version' package.json > version
 
-FROM node:22-alpine AS runner
+FROM node:24-alpine AS runner
 
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME/bin:$PATH"
