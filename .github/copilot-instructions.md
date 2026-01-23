@@ -2,7 +2,8 @@
 
 ## プロジェクト概要
 
-このプロジェクトは `telcheck` という名前の TypeScript/Node.js アプリケーションです。NVR510 ルーターの着信・発信情報を監視し、電話番号の確認と通知を行うシステムです。
+このプロジェクトは `telcheck` という名前の TypeScript/Node.js アプリケーションです。NVR510
+ルーターの着信・発信情報を監視し、電話番号の確認と通知を行うシステムです。
 
 ### 技術スタック
 
@@ -36,7 +37,7 @@
 
 ### フォーマット
 
-```
+```text
 <type>[optional scope]: <description>
 
 [optional body]
@@ -54,9 +55,9 @@
 - `test`: テスト追加・修正
 - `chore`: その他の変更
 
-### 例
+### 例（コミット）
 
-```
+```text
 feat(notification): Discord Webhook 通知機能を追加
 
 Discord Webhook を使用した通知機能を実装しました。
@@ -80,7 +81,7 @@ Closes #123
 - 関数の目的や引数の説明を JSDoc 形式で記述
 - TODO コメントには日付と担当者を明記
 
-### 例
+### 例（実装）
 
 ```typescript
 /**
@@ -88,11 +89,15 @@ Closes #123
  * @param phoneNumber 検索対象の電話番号
  * @returns 電話番号の詳細情報、見つからない場合は null
  */
-async function searchPhoneNumber(phoneNumber: string): Promise<PhoneDetail | null> {
-  // Google 検索 API を使用して電話番号を検索
+async function searchPhoneNumber(
+  phoneNumber: string
+): Promise<PhoneDetail | null> {
+  // Google 検索 API を使用して
+  // 電話番号を検索
   const searchResult = await googleSearch(phoneNumber)
-  
-  // TODO: 2024-01-15 より効率的な検索アルゴリズムの実装を検討 (Tomachi)
+
+  // TODO: 2024-01-15 より効率的な検索アルゴリズムの実装を検討
+  // (Tomachi)
   return parseSearchResult(searchResult)
 }
 ```
@@ -144,7 +149,7 @@ pnpm lint:tsc
 
 ## ファイル構成
 
-```
+```text
 src/
 ├── main.ts              # アプリケーションのエントリポイント
 ├── utils/               # ユーティリティ関数
@@ -168,7 +173,8 @@ src/
 
 ### 設定
 
-設定ファイル `data/config.json` で通知先を設定します。JSON Schema は `schema/Configuration.json` を参照してください。
+設定ファイル `data/config.json` で通知先を設定します。JSON Schema は `schema/Configuration.json`
+を参照してください。
 
 ## Docker
 
