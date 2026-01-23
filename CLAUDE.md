@@ -95,3 +95,4 @@ pnpm install
 6. PR 本文の崩れがないことを確認する。
 
 ## リポジトリ固有
+- 目的: [NVR510](https://network.yamaha.com/products/routers/nvr510/index) の発信者確認と通知を行います。
