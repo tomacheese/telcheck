@@ -35,7 +35,7 @@
     "@types/cheerio": "1.0.0",
     "@types/node": "24.10.12",
     "@types/web-push": "3.6.4",
-    "axios": "1.13.4",
+    "axios": "1.13.5",
     "cheerio": "1.2.0",
     "eslint": "10.0.0",
     "eslint-config-standard": "17.1.0",
