@@ -1,8 +1,10 @@
-import axios from 'axios'
+import axios, { AxiosInstance } from 'axios'
 import { load } from 'cheerio'
 import { Configuration, PATH } from './config'
 import fs from 'node:fs'
 import { Logger } from '@book000/node-utils'
+import http from 'node:http'
+import https from 'node:https'
 
 interface PhoneDetail {
   name: string
@@ -34,12 +36,15 @@ export type PhoneDetailResult = PhoneDetail | GoogleSearchResult | null
 
 class BaseSearchNumber {
   public readonly serviceName: string
-  protected readonly $axios
+  protected readonly $axios: AxiosInstance
 
   constructor(serviceName: string) {
     this.serviceName = serviceName
 
+    // HTTP Keep-Alive を有効化してソケットを再利用
     this.$axios = axios.create({
+      httpAgent: new http.Agent({ keepAlive: true }),
+      httpsAgent: new https.Agent({ keepAlive: true }),
       timeout: 10_000,
       headers: {
         'User-Agent':
@@ -106,7 +111,7 @@ class TelNavi extends BaseSearchNumber {
   }
 
   public async search(number: string): Promise<PhoneDetailResult> {
-    const response = await axios.get(`https://telnavi.jp/phone/${number}`)
+    const response = await this.$axios.get(`https://telnavi.jp/phone/${number}`)
     if (response.status !== 200) {
       throw new Error(`Failed to get telnavi: ${response.status}`)
     }

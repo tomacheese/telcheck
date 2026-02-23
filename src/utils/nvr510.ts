@@ -1,4 +1,6 @@
-import axios from 'axios'
+import axios, { AxiosInstance } from 'axios'
+import http from 'node:http'
+import https from 'node:https'
 
 interface SyslogItem {
   date: string
@@ -21,6 +23,7 @@ export class NVR510 {
   private readonly ip: string
   private readonly username: string
   private readonly password: string
+  private readonly axios: AxiosInstance
 
   // 2023/01/21 17:03:31: PP[01] IP Commencing (DNS Query [ssl.gstatic.com] from 192.168.0.99)
   // 2023/01/21 17:03:31: same message repeated 1 times
@@ -50,11 +53,18 @@ export class NVR510 {
     this.ip = ip
     this.username = username
     this.password = password
+
+    // HTTP Keep-Alive を有効化してソケットを再利用
+    this.axios = axios.create({
+      httpAgent: new http.Agent({ keepAlive: true }),
+      httpsAgent: new https.Agent({ keepAlive: true }),
+      timeout: 10_000,
+    })
   }
 
   public async getDashboardSyslog(): Promise<SyslogItem[]> {
     // http://192.168.0.1/dashboard/syslog_data.csv?num=100
-    const response = await axios.get<string>(
+    const response = await this.axios.get<string>(
       `http://${this.ip}/dashboard/syslog_data.csv?num=100`,
       {
         auth: {
