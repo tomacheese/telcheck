@@ -1,4 +1,4 @@
-import baseConfig from '@book000/eslint-config';
+import baseConfig from '@book000/eslint-config'
 
 /**
  * @type {import('eslint').Linter.Config[]}
@@ -21,6 +21,6 @@ const config = [
       ],
     },
   },
-];
+]
 
-export default config;
+export default config
