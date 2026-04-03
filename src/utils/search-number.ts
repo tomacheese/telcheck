@@ -187,8 +187,8 @@ export async function searchNumber(
     new GoogleSearch(config),
   ]
   for (const searcher of searchers) {
-    const result = await searcher.search(number).catch((error: unknown) => {
-      logger.error('Failed to search number', error as Error)
+    const result = await searcher.search(number).catch((err: unknown) => {
+      logger.error('Failed to search number', err as Error)
       return null
     })
     if (result) {

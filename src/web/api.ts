@@ -76,19 +76,19 @@ export class ApiRouter extends BaseRouter {
       this.webPush.addSubscription(subscription)
 
       await reply.code(statusCode).send()
-    } catch (error) {
-      if (error instanceof WebPushError) {
+    } catch (err) {
+      if (err instanceof WebPushError) {
         await reply.code(500).send({
-          message: error.message,
-          statusCode: error.statusCode,
-          headers: error.headers,
-          body: error.body,
-          endpoint: error.endpoint,
+          message: err.message,
+          statusCode: err.statusCode,
+          headers: err.headers,
+          body: err.body,
+          endpoint: err.endpoint,
         })
         return
       }
       await reply.code(500).send({
-        message: (error as Error).message,
+        message: (err as Error).message,
       })
     }
   }

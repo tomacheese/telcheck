@@ -116,8 +116,8 @@ export class WebPush {
           privateKey: this.vapidPrivateKey,
         },
       })
-      .catch((error: unknown) => {
-        logger.error('Error sending notification', error as Error)
+      .catch((err: unknown) => {
+        logger.error('Error sending notification', err as Error)
       })
 
     if (!response) {

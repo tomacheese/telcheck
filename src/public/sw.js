@@ -26,8 +26,8 @@ self.addEventListener('push', (event) => {
       icon,
       data,
     })
-  } catch (error) {
-    console.error(error)
+  } catch (err) {
+    console.error(err)
   }
 })
 
@@ -37,7 +37,7 @@ self.addEventListener('notificationclick', (event) => {
     event.notification.close()
     // @ts-expect-error event.notification is not null
     clients.openWindow(event.notification.data?.url ?? '/')
-  } catch (error) {
-    console.error(error)
+  } catch (err) {
+    console.error(err)
   }
 })

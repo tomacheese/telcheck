@@ -212,10 +212,10 @@ async function main() {
       if (!result) {
         alert('通知の購読に失敗しました')
       }
-    } catch (error) {
-      console.error(error)
-      // @ts-expect-error error.message is not null
-      alert(`通知の購読に失敗しました: ${error.message}`)
+    } catch (err) {
+      console.error(err)
+      // @ts-expect-error err.message is not null
+      alert(`通知の購読に失敗しました: ${err.message}`)
     }
   })
 
@@ -227,10 +227,10 @@ async function main() {
       } else {
         alert('通知の解除に失敗しました')
       }
-    } catch (error) {
-      console.error(error)
-      // @ts-expect-error error.message is not null
-      alert(`通知の解除に失敗しました: ${error.message}`)
+    } catch (err) {
+      console.error(err)
+      // @ts-expect-error err.message is not null
+      alert(`通知の解除に失敗しました: ${err.message}`)
     }
   })
 }
@@ -239,8 +239,8 @@ async function main() {
 ;(async () => {
   try {
     await main()
-  } catch (error) {
-    console.error(error)
+  } catch (err) {
+    console.error(err)
     alert('エラーが発生しました')
   }
 })()
