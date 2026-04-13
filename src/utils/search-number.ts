@@ -1,10 +1,9 @@
-import axios, { AxiosInstance } from 'axios'
+// axios 削除
+
 import { load } from 'cheerio'
 import { Configuration, PATH } from './config'
 import fs from 'node:fs'
 import { Logger } from '@book000/node-utils'
-import http from 'node:http'
-import https from 'node:https'
 
 interface PhoneDetail {
   name: string
@@ -36,22 +35,8 @@ export type PhoneDetailResult = PhoneDetail | GoogleSearchResult | null
 
 class BaseSearchNumber {
   public readonly serviceName: string
-  protected readonly $axios: AxiosInstance
-
   constructor(serviceName: string) {
     this.serviceName = serviceName
-
-    // HTTP Keep-Alive を有効化してソケットを再利用
-    this.$axios = axios.create({
-      httpAgent: new http.Agent({ keepAlive: true }),
-      httpsAgent: new https.Agent({ keepAlive: true }),
-      timeout: 10_000,
-      headers: {
-        'User-Agent':
-          'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/109.0',
-      },
-      validateStatus: () => true,
-    })
   }
 
   public search(number: string): Promise<PhoneDetailResult> {
@@ -111,12 +96,15 @@ class TelNavi extends BaseSearchNumber {
   }
 
   public async search(number: string): Promise<PhoneDetailResult> {
-    const response = await this.$axios.get(`https://telnavi.jp/phone/${number}`)
-    if (response.status !== 200) {
-      throw new Error(`Failed to get telnavi: ${response.status}`)
+    const res = await fetch(`https://telnavi.jp/phone/${number}`, {
+      signal: AbortSignal.timeout(10_000),
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; telcheck)' },
+    })
+    if (!res.ok) {
+      throw new Error(`Failed to get telnavi: ${res.status}`)
     }
-
-    const $ = load(response.data)
+    const html = await res.text()
+    const $ = load(html)
     const title = $('title').text()
     const match = this.titleRegex.exec(title)
     if (match) {
@@ -149,24 +137,22 @@ class GoogleSearch extends BaseSearchNumber {
     const searchCx = this.config.google_search.cx
 
     const url = `https://www.googleapis.com/customsearch/v1?key=${searchKey}&cx=${searchCx}&lr=lang_ja&q="${number}"`
-    const response = await this.$axios.get<GoogleCustomSearchResponse>(url)
-    if (response.status !== 200) {
-      throw new Error(`Failed to get google search: ${response.status}`)
+    const res = await fetch(url, {
+      signal: AbortSignal.timeout(10_000),
+    })
+    if (!res.ok) {
+      throw new Error(`Failed to get google search: ${res.status}`)
     }
-
-    if (!response.data.items) {
+    const data: GoogleCustomSearchResponse = await res.json()
+    if (!data.items) {
       return null
     }
-
-    const count = response.data.searchInformation.formattedTotalResults
-    const results = response.data.items
-      .slice(0, 3)
-      .map((item: { title: any; link: any; snippet: any }) => ({
-        title: item.title,
-        url: item.link,
-        snippet: item.snippet,
-      }))
-
+    const count = data.searchInformation.formattedTotalResults
+    const results = data.items.slice(0, 3).map((item) => ({
+      title: item.title,
+      url: item.link,
+      snippet: item.snippet,
+    }))
     return {
       count,
       items: results,

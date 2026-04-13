@@ -1,7 +1,3 @@
-import axios, { AxiosInstance } from 'axios'
-import http from 'node:http'
-import https from 'node:https'
-
 interface SyslogItem {
   date: string
   time: string
@@ -23,8 +19,6 @@ export class NVR510 {
   private readonly ip: string
   private readonly username: string
   private readonly password: string
-  private readonly axios: AxiosInstance
-
   // 2023/01/21 17:03:31: PP[01] IP Commencing (DNS Query [ssl.gstatic.com] from 192.168.0.99)
   // 2023/01/21 17:03:31: same message repeated 1 times
   // 2023/01/21 17:03:32: PPPOE[01] Connecting to PPPoE server
@@ -53,35 +47,26 @@ export class NVR510 {
     this.ip = ip
     this.username = username
     this.password = password
-
-    // HTTP Keep-Alive を有効化してソケットを再利用
-    this.axios = axios.create({
-      httpAgent: new http.Agent({ keepAlive: true }),
-      httpsAgent: new https.Agent({ keepAlive: true }),
-      timeout: 10_000,
-    })
   }
 
   public async getDashboardSyslog(): Promise<SyslogItem[]> {
     // http://192.168.0.1/dashboard/syslog_data.csv?num=100
-    const response = await this.axios.get<string>(
+    const res = await fetch(
       `http://${this.ip}/dashboard/syslog_data.csv?num=100`,
       {
-        auth: {
-          username: this.username,
-          password: this.password,
+        headers: {
+          Authorization:
+            'Basic ' +
+            Buffer.from(`${this.username}:${this.password}`).toString('base64'),
         },
+        signal: AbortSignal.timeout(10_000),
       }
     )
-    if (response.status !== 200) {
-      throw new Error(`Failed to get syslog: ${response.status}`)
+    if (!res.ok) {
+      throw new Error(`Failed to get syslog: ${res.status}`)
     }
-    // csvで返る
-    // スペースが &nbsp; になっているので、&nbsp; をスペースに変換する
-    // 改行が不定で、\r だけだったり \r\n だったりするので、\n に統一する
-    // <br> も混ざっているので、<br> を削除する
-    // 最初の行はヘッダーなので削除する
-    const data = response.data
+    const text = await res.text()
+    const data = text
       .replaceAll('&nbsp;', ' ')
       .replaceAll('<br>', '')
       .replaceAll('\r\n', '\r')

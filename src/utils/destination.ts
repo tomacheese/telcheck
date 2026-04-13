@@ -1,4 +1,3 @@
-import axios, { AxiosInstance } from 'axios'
 import {
   IDestination,
   isDestinationDiscordBot,
@@ -8,16 +7,11 @@ import {
   isDestinationWebPush,
 } from './config'
 import { WebPush } from './web-push'
-import http from 'node:http'
-import https from 'node:https'
 
-// HTTP Keep-Alive を有効化したグローバル axios インスタンス
-const axiosInstance: AxiosInstance = axios.create({
-  httpAgent: new http.Agent({ keepAlive: true }),
-  httpsAgent: new https.Agent({ keepAlive: true }),
-  timeout: 10_000,
-  validateStatus: () => true,
-})
+// HTTP Keep-Alive を有効化したフェッチラッパー
+const fetchWithKeepAlive = async (url: string, options: RequestInit = {}) => {
+  return await fetch(url, { ...options, keepalive: true })
+}
 
 class BaseDestination {
   public send(message: string): Promise<void> {
@@ -33,9 +27,13 @@ class DiscordWebhookDestination extends BaseDestination {
   }
 
   public async send(message: string): Promise<void> {
-    const response = await axiosInstance.post(this.url, { content: message })
-    if (response.status !== 204 && response.status !== 200) {
-      throw new Error(`Discord webhook failed (${response.status})`)
+    const res = await fetchWithKeepAlive(this.url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content: message }),
+    })
+    if (!res.ok && res.status !== 204) {
+      throw new Error(`Discord webhook failed (${res.status})`)
     }
   }
 }
@@ -49,17 +47,19 @@ class DiscordBotDestination extends BaseDestination {
   }
 
   public async send(message: string): Promise<void> {
-    const response = await axiosInstance.post(
+    const res = await fetchWithKeepAlive(
       `https://discord.com/api/channels/${this.channelId}/messages`,
-      { content: message },
       {
+        method: 'POST',
         headers: {
+          'Content-Type': 'application/json',
           Authorization: `Bot ${this.token}`,
         },
+        body: JSON.stringify({ content: message }),
       }
     )
-    if (response.status !== 204 && response.status !== 200) {
-      throw new Error(`Discord webhook failed (${response.status})`)
+    if (!res.ok && res.status !== 204) {
+      throw new Error(`Discord bot message failed (${res.status})`)
     }
   }
 }
@@ -70,9 +70,13 @@ class SlackDestination extends BaseDestination {
   }
 
   public async send(message: string): Promise<void> {
-    const response = await axiosInstance.post(this.url, { text: message })
-    if (response.status !== 200) {
-      throw new Error(`Slack webhook failed (${response.status})`)
+    const res = await fetchWithKeepAlive(this.url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: message }),
+    })
+    if (!res.ok) {
+      throw new Error(`Slack webhook failed (${res.status})`)
     }
   }
 }
@@ -85,17 +89,18 @@ class LINENotifyDestination extends BaseDestination {
   public async send(message: string): Promise<void> {
     const parameters = new URLSearchParams()
     parameters.append('message', message)
-    const response = await axiosInstance.post(
+    const res = await fetchWithKeepAlive(
       'https://notify-api.line.me/api/notify',
-      parameters,
       {
+        method: 'POST',
         headers: {
           Authorization: `Bearer ${this.token}`,
         },
+        body: parameters,
       }
     )
-    if (response.status !== 200) {
-      throw new Error(`LINE Notify failed (${response.status})`)
+    if (!res.ok) {
+      throw new Error(`LINE Notify failed (${res.status})`)
     }
   }
 }
