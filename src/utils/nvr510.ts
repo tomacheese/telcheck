@@ -59,6 +59,7 @@ export class NVR510 {
             'Basic ' +
             Buffer.from(`${this.username}:${this.password}`).toString('base64'),
         },
+        signal: AbortSignal.timeout(10_000),
       }
     )
     if (!res.ok) {

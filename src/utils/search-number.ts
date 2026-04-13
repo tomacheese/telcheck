@@ -96,7 +96,10 @@ class TelNavi extends BaseSearchNumber {
   }
 
   public async search(number: string): Promise<PhoneDetailResult> {
-    const res = await fetch(`https://telnavi.jp/phone/${number}`)
+    const res = await fetch(`https://telnavi.jp/phone/${number}`, {
+      signal: AbortSignal.timeout(10_000),
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; telcheck)' },
+    })
     if (!res.ok) {
       throw new Error(`Failed to get telnavi: ${res.status}`)
     }
@@ -134,7 +137,9 @@ class GoogleSearch extends BaseSearchNumber {
     const searchCx = this.config.google_search.cx
 
     const url = `https://www.googleapis.com/customsearch/v1?key=${searchKey}&cx=${searchCx}&lr=lang_ja&q="${number}"`
-    const res = await fetch(url)
+    const res = await fetch(url, {
+      signal: AbortSignal.timeout(10_000),
+    })
     if (!res.ok) {
       throw new Error(`Failed to get google search: ${res.status}`)
     }

@@ -1,5 +1,3 @@
-// axios 削除
-
 import {
   IDestination,
   isDestinationDiscordBot,
@@ -9,17 +7,10 @@ import {
   isDestinationWebPush,
 } from './config'
 import { WebPush } from './web-push'
-import http from 'node:http'
-import https from 'node:https'
 
-// HTTP Keep-Alive を有効化したグローバル axios インスタンス
+// HTTP Keep-Alive を有効化したフェッチラッパー
 const fetchWithKeepAlive = async (url: string, options: RequestInit = {}) => {
-  // Node.js v18+ の fetch は keepAlive オプションをサポート
-  const agent = url.startsWith('https')
-    ? new https.Agent({ keepAlive: true })
-    : new http.Agent({ keepAlive: true })
-  const opts = { ...options, agent, signal: options.signal }
-  return await fetch(url, opts)
+  return await fetch(url, { ...options, keepalive: true })
 }
 
 class BaseDestination {
@@ -68,7 +59,7 @@ class DiscordBotDestination extends BaseDestination {
       }
     )
     if (!res.ok && res.status !== 204) {
-      throw new Error(`Discord webhook failed (${res.status})`)
+      throw new Error(`Discord bot message failed (${res.status})`)
     }
   }
 }
