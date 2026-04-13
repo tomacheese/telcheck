@@ -1,7 +1,3 @@
-// axios 削除
-
-import http from 'node:http'
-import https from 'node:https'
 
 interface SyslogItem {
   date: string

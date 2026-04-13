@@ -4,8 +4,6 @@ import { load } from 'cheerio'
 import { Configuration, PATH } from './config'
 import fs from 'node:fs'
 import { Logger } from '@book000/node-utils'
-import http from 'node:http'
-import https from 'node:https'
 
 interface PhoneDetail {
   name: string
