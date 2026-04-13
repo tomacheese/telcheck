@@ -17,10 +17,10 @@ const fetchWithKeepAlive = async (url: string, options: RequestInit = {}) => {
   // Node.js v18+ の fetch は keepAlive オプションをサポート
   const agent = url.startsWith('https')
     ? new https.Agent({ keepAlive: true })
-    : new http.Agent({ keepAlive: true });
-  const opts = { ...options, agent, signal: options.signal };
-  return await fetch(url, opts);
-};
+    : new http.Agent({ keepAlive: true })
+  const opts = { ...options, agent, signal: options.signal }
+  return await fetch(url, opts)
+}
 
 class BaseDestination {
   public send(message: string): Promise<void> {
@@ -39,10 +39,10 @@ class DiscordWebhookDestination extends BaseDestination {
     const res = await fetchWithKeepAlive(this.url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ content: message })
-    });
+      body: JSON.stringify({ content: message }),
+    })
     if (!res.ok && res.status !== 204) {
-      throw new Error(`Discord webhook failed (${res.status})`);
+      throw new Error(`Discord webhook failed (${res.status})`)
     }
   }
 }
@@ -56,16 +56,19 @@ class DiscordBotDestination extends BaseDestination {
   }
 
   public async send(message: string): Promise<void> {
-    const res = await fetchWithKeepAlive(`https://discord.com/api/channels/${this.channelId}/messages`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bot ${this.token}`,
-      },
-      body: JSON.stringify({ content: message })
-    });
+    const res = await fetchWithKeepAlive(
+      `https://discord.com/api/channels/${this.channelId}/messages`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bot ${this.token}`,
+        },
+        body: JSON.stringify({ content: message }),
+      }
+    )
     if (!res.ok && res.status !== 204) {
-      throw new Error(`Discord webhook failed (${res.status})`);
+      throw new Error(`Discord webhook failed (${res.status})`)
     }
   }
 }
@@ -79,10 +82,10 @@ class SlackDestination extends BaseDestination {
     const res = await fetchWithKeepAlive(this.url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text: message })
-    });
+      body: JSON.stringify({ text: message }),
+    })
     if (!res.ok) {
-      throw new Error(`Slack webhook failed (${res.status})`);
+      throw new Error(`Slack webhook failed (${res.status})`)
     }
   }
 }
@@ -95,15 +98,18 @@ class LINENotifyDestination extends BaseDestination {
   public async send(message: string): Promise<void> {
     const parameters = new URLSearchParams()
     parameters.append('message', message)
-    const res = await fetchWithKeepAlive('https://notify-api.line.me/api/notify', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${this.token}`
-      },
-      body: parameters
-    });
+    const res = await fetchWithKeepAlive(
+      'https://notify-api.line.me/api/notify',
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${this.token}`,
+        },
+        body: parameters,
+      }
+    )
     if (!res.ok) {
-      throw new Error(`LINE Notify failed (${res.status})`);
+      throw new Error(`LINE Notify failed (${res.status})`)
     }
   }
 }

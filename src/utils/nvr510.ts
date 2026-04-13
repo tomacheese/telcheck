@@ -49,22 +49,27 @@ export class NVR510 {
   private readonly sipRegex = /^sip:(?<number>.+?)(@.+)?$/
 
   constructor(ip: string, username: string, password: string) {
-    this.ip = ip;
-    this.username = username;
-    this.password = password;
+    this.ip = ip
+    this.username = username
+    this.password = password
   }
 
   public async getDashboardSyslog(): Promise<SyslogItem[]> {
     // http://192.168.0.1/dashboard/syslog_data.csv?num=100
-    const res = await fetch(`http://${this.ip}/dashboard/syslog_data.csv?num=100`, {
-      headers: {
-        Authorization: 'Basic ' + Buffer.from(`${this.username}:${this.password}`).toString('base64'),
-      },
-    });
+    const res = await fetch(
+      `http://${this.ip}/dashboard/syslog_data.csv?num=100`,
+      {
+        headers: {
+          Authorization:
+            'Basic ' +
+            Buffer.from(`${this.username}:${this.password}`).toString('base64'),
+        },
+      }
+    )
     if (!res.ok) {
-      throw new Error(`Failed to get syslog: ${res.status}`);
+      throw new Error(`Failed to get syslog: ${res.status}`)
     }
-    const text = await res.text();
+    const text = await res.text()
     const data = text
       .replaceAll('&nbsp;', ' ')
       .replaceAll('<br>', '')
@@ -72,8 +77,8 @@ export class NVR510 {
       .replaceAll('\r', '\n')
       .split('\n')
       .slice(1)
-      .join('\r\n');
-    return this.parseSyslog(data);
+      .join('\r\n')
+    return this.parseSyslog(data)
   }
 
   public async getCallsFromSyslog(): Promise<SyslogCall[]> {
