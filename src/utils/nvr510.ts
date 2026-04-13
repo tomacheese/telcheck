@@ -1,4 +1,3 @@
-
 interface SyslogItem {
   date: string
   time: string
