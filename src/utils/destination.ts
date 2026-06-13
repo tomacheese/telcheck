@@ -115,8 +115,8 @@ class WebPushDestination extends BaseDestination {
       return
     }
 
-    const rawTitle = message.split('\n')[0]
-    const rawBody = message.split('\n').slice(1).join('\n')
+    const rawTitle = message.split('\n', 1)[0]
+    const rawBody = message.slice(rawTitle.length + 1)
     const title = rawTitle
       .replaceAll('☎ ', '')
       .replaceAll('**', '')

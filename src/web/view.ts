@@ -19,7 +19,7 @@ export class ViewRouter extends BaseRouter {
   ) {
     let path = request.url
     if (path.includes('?')) {
-      path = path.split('?')[0]
+      path = path.split('?', 1)[0]
     }
     if (path === '') {
       path = 'index.html'
