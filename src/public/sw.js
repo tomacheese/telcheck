@@ -1,7 +1,7 @@
 /* eslint-disable unicorn/no-null */
-/* global self, clients */
+/* global clients */
 
-self.addEventListener('push', (event) => {
+globalThis.addEventListener('push', (event) => {
   try {
     if (
       globalThis.Notification == null ||
@@ -31,7 +31,7 @@ self.addEventListener('push', (event) => {
   }
 })
 
-self.addEventListener('notificationclick', (event) => {
+globalThis.addEventListener('notificationclick', (event) => {
   try {
     // @ts-expect-error event.notification is not null
     event.notification.close()
