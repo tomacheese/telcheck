@@ -44,8 +44,11 @@ Claude Code の作業方針とプロジェクト固有ルールを示す。
 # インストール
 pnpm install
 
-# 開発
+# 開発（tsx watch によるホットリロード）
 pnpm dev
+
+# 実行（tsx で直接起動）
+pnpm start
 
 # Lint / 型チェック
 pnpm lint
@@ -104,6 +107,12 @@ pnpm generate-schema
 4. Copilot レビューに対応する
 5. Codex のコードレビューを実施する
 
+## セキュリティ / 禁止事項
+- API キー・認証情報・VAPID キー・電話番号などの個人情報を Git にコミットしない。
+- ログに機密情報（認証情報・設定値）を出力しない。
+- 設定値は環境変数または設定ファイル経由で受け取り、ソースにハードコードしない。
+
 ## リポジトリ固有
+- 設定ファイルは `data/config.json` が唯一のソースであり、その構造は `schema/Configuration.json` に定義されている。パスは環境変数 `CONFIG_PATH` で上書きできる。
 - NVR510 のログイン・ログ取得処理はルーターへの負荷を考慮して実装されている。
 - Web Push 通知には VAPID キーの設定が必要。

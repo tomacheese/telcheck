@@ -1,69 +1,32 @@
-# GitHub Copilot Instructions
+# GitHub Copilot Code Review Instructions
 
-## プロジェクト概要
-- 目的: Yamaha NVR510 ルーターの発信者確認と通知
-- 主な機能:
-  - システムログの解析による発着信情報の取得
-  - 電話番号の所有者検索（迷惑電話の特定）
-  - 各種プラットフォーム（Discord, Slack, LINE, Web Push）への通知
-- 対象ユーザー: NVR510 を利用している個人・管理者
+このファイルは GitHub Copilot のコードレビュー向け。開発手順やコマンドは `CLAUDE.md` を参照し、ここでは重複させない。レビュー時に重点確認する観点と、フラグすべきでない既知パターンのみを記載する。
 
-## 共通ルール
-- 会話は日本語で行う。
-- PR とコミットは Conventional Commits に従う。
-  - `<type>(<scope>): <description>` 形式
-  - `<description>` は日本語で記載
+## プロジェクトの前提
+
+- Yamaha NVR510 ルーターの発着信を解析し、各種プラットフォーム（Discord, Slack, LINE, Web Push）へ通知する TypeScript 製アプリ。個人・少人数運用の private リポジトリ。
+
+## 強制されている規約（逸脱は指摘する）
+
+- フォーマット: Prettier（`.prettierrc.yml`）。整形差分は指摘する。
+- Lint: ESLint（`eslint.config.mjs`, `@book000/eslint-config`）。
+- 型: `tsc`（`tsconfig.json`）。`skipLibCheck` による型エラー回避は禁止。
+- 関数・インターフェースには日本語の JSDoc を付与する。
+- コメント・会話は日本語、エラーメッセージは英語。
 - 日本語と英数字の間には半角スペースを入れる。
+- コミットは Conventional Commits（`<description>` は日本語）。
 
-## 技術スタック
-- 言語: TypeScript
-- フレームワーク: Fastify (Web API / Dashboard)
-- パッケージマネージャー: pnpm
-- 主要ライブラリ: axios, cheerio (番号検索), web-push
+## レビュー時の重点確認
 
-## コーディング規約
-- フォーマット: Prettier (`.prettierrc.yml`)
-- Lint: ESLint (`eslint.config.mjs`)
-- 型チェック: TypeScript (`tsconfig.json`)
-- 関数やインターフェースには docstring (JSDoc) を日本語で記載する。
-- TypeScript の `skipLibCheck` による回避は禁止。
+- エラーハンドリング: 例外を握りつぶしていないか。既存のエラーメッセージが絵文字付きなら、新規メッセージも内容に即した絵文字を先頭に付ける慣習に従っているか。
+- 責務分離: 共通ロジックは `src/utils` に置く。`src/web`（Fastify ルーター/API）へロジックを直書きしていないか。
+- 型安全性: `any` の濫用や不必要な型アサーションがないか。
+- 機密情報: 認証情報・VAPID キー・電話番号などの個人情報がコミットやログに混入していないか。設定は `data/config.json`（`CONFIG_PATH` で上書き可）経由で扱う。
+- スキーマ整合: `Configuration` 型を変更したら `pnpm generate-schema` で `schema/Configuration.json` が再生成されているか。
+- ドキュメント整合: NVR510 の内部 API を変更したら `API.md` が更新されているか。
 
-## 開発コマンド
-```bash
-# 依存関係のインストール
-pnpm install
+## フラグすべきでない既知パターン
 
-# 開発（ホットリロードあり）
-pnpm dev
-
-# 実行
-pnpm start
-
-# Lint 実行
-pnpm lint
-
-# 自動修正（ESLint, Prettier）
-pnpm fix
-
-# JSON Schema 生成
-pnpm generate-schema
-```
-
-## テスト方針
-- 現在、明示的なテストコード（Jest, Vitest 等）は導入されていない。
-- コード変更時は `pnpm lint` による型チェックと静的解析を必ず実行する。
-
-## セキュリティ / 機密情報
-- 認証情報や API キーを Git にコミットしない。
-- ログに機密情報を出力しない。
-- 設定ファイル (`data/config.json`) の扱いに注意する。
-
-## ドキュメント更新
-- `API.md`: API 仕様の変更時に更新
-- `schema/Configuration.json`: 設定項目の変更時に `pnpm generate-schema` で更新
-- `README.md`: 機能追加や設定方法の変更時に更新
-
-## リポジトリ固有
-- NVR510 のシステムログを解析するロジックは `src/utils/nvr510.ts` に集約されている。
-- 通知先の実装は `src/utils/destination.ts` および `src/utils/web-push.ts` を参照。
-- ダッシュボードのフロントエンド資産は `src/public` に配置されている。
+- 自動テスト（Jest / Vitest 等）が存在しないこと自体は現状の方針であり、テスト未追加をブロッカーとして指摘しない（検証は Lint と型チェックで行う）。
+- 日本語のコメント・コミットメッセージは規約どおりであり、英語化を求めない。
+- `API.md` や実装中の NVR510 ダッシュボード用エンドポイントパスは、ルーター側の固定仕様に合わせた意図的なもの。
