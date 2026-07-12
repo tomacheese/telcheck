@@ -1,4 +1,4 @@
-/* eslint-disable unicorn/no-null */
+ 
 /* global alert */
 
 async function isWebPushSupported() {
@@ -13,10 +13,7 @@ async function isWebPushSupported() {
   try {
     const sw = await navigator.serviceWorker.ready
     // 利用可能になったサービスワーカーがpushManagerプロパティがあればPush APIに対応しているとみなす
-    if (!('pushManager' in sw)) {
-      return false
-    }
-    return true
+    return !!('pushManager' in sw);
   } catch {
     return false
   }
@@ -71,8 +68,7 @@ async function subscribe(destinationName) {
     if (result === 'default') {
       throw new Error('Permission prompt dismissed.')
     }
-  }
-  if (globalThis.Notification.permission === 'denied') {
+  } else if (globalThis.Notification.permission === 'denied') {
     throw new Error('Permission denied.')
   }
 
@@ -108,10 +104,7 @@ async function subscribe(destinationName) {
         },
       }),
     })
-    if (!response.ok) {
-      return false
-    }
-    return true
+    return !!response.ok;
   } catch {
     return false
   }
@@ -153,11 +146,7 @@ async function unsubscribe(destinationName) {
     throw new Error('Already unsubscribed.')
   }
 
-  if (!response.ok) {
-    return false
-  }
-
-  return true
+  return !!response.ok;
 }
 
 async function main() {
@@ -186,8 +175,7 @@ async function main() {
   }
 
   forceReloadButton.addEventListener('click', () => {
-    // @ts-expect-error reload argument is not in the spec
-    globalThis.location.reload(true)
+    globalThis.location.reload()
   })
 
   const isSupported = await isWebPushSupported()
@@ -235,7 +223,7 @@ async function main() {
   })
 }
 
-// eslint-disable-next-line unicorn/prefer-top-level-await
+ 
 ;(async () => {
   try {
     await main()

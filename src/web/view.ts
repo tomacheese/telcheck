@@ -54,7 +54,7 @@ export class ViewRouter extends BaseRouter {
         fs
           .readFileSync(`./public/${path}`)
           .toString()
-          .replaceAll('{{VERSION}}', this.version)
+          .replaceAll('{{VERSION}}', () => this.version)
       )
       return
     }
