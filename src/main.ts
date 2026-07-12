@@ -1,10 +1,5 @@
 import { Checked } from './utils/checked'
-import {
-  CallDetail,
-  Configuration,
-  IDestination,
-  loadConfig,
-} from './utils/config'
+import { CallDetail, Config, IDestination, loadConfig } from './utils/config'
 import { getDestination } from './utils/destination'
 import { Logger } from '@book000/node-utils'
 import { NVR510, SyslogCall } from './utils/nvr510'
@@ -60,7 +55,7 @@ function getCallerName(callerResult: PhoneDetailResult) {
 }
 
 function getIDestinations(
-  config: Configuration,
+  config: Config,
   detail: CallDetail
 ): IDestination[] | null {
   const destination = config.destinations.filter((d) =>
@@ -73,7 +68,7 @@ function getIDestinations(
   return destination.length > 0 ? destination : null
 }
 
-function getSelfName(config: Configuration, detail: CallDetail): string {
+function getSelfName(config: Config, detail: CallDetail): string {
   const self = config.selfs.find((d) =>
     Object.entries(d.condition).every(
       // @ts-expect-error インデックスがstringなのでエラー
@@ -124,7 +119,7 @@ function getGoogleSearchMessage(
   ].join('\n')
 }
 
-async function checker(config: Configuration) {
+async function checker(config: Config) {
   const logger = Logger.configure('checker')
   logger.info('✨ checker()')
   const isFirst = Checked.isFirst()
@@ -213,9 +208,7 @@ async function main() {
     logger.info('🚀 Start web server')
     const app = await buildWebApp(config, webPush)
     const host = process.env.API_HOST ?? '0.0.0.0'
-    const port = process.env.API_PORT
-      ? Number.parseInt(process.env.API_PORT, 10)
-      : 8000
+    const port = process.env.API_PORT ? Number(process.env.API_PORT) : 8000
     app.listen({ host, port }, (error, address) => {
       if (error) {
         logger.error('❌ Fastify.listen error', error)
@@ -229,11 +222,11 @@ async function main() {
   logger.info('🔍 Start checking')
 
   while (true) {
-    await checker(config)
-      // eslint-disable-next-line @typescript-eslint/no-empty-function
-      .then(() => {})
-      // eslint-disable-next-line @typescript-eslint/no-empty-function
-      .catch(() => {})
+    try {
+      await checker(config)
+    } catch (error) {
+      logger.error('❌ checker() failed', error as Error)
+    }
     await new Promise((resolve) => setTimeout(resolve, 1000))
   }
 }

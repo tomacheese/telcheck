@@ -47,8 +47,8 @@ export class WebPush {
   }
 
   public static getInstance(): WebPush {
-    WebPush.instance ??= new WebPush()
-    return WebPush.instance
+    this.instance ??= new WebPush()
+    return this.instance
   }
 
   public getBase64PublicKey(): string {
@@ -108,23 +108,19 @@ export class WebPush {
     payload: string
   ): Promise<number> {
     const logger = Logger.configure('WebPush.sendNotification')
-    const response = await webpush
-      .sendNotification(subscription, payload, {
+    try {
+      const response = await webpush.sendNotification(subscription, payload, {
         vapidDetails: {
           subject: `mailto:${process.env.WEB_PUSH_EMAIL}`,
           publicKey: this.vapidPublicKey,
           privateKey: this.vapidPrivateKey,
         },
       })
-      .catch((error: unknown) => {
-        logger.error('Error sending notification', error as Error)
-      })
-
-    if (!response) {
+      return response.statusCode
+    } catch (error) {
+      logger.error('Error sending notification', error as Error)
       return 500
     }
-
-    return response.statusCode
   }
 
   public async sendNotifications(

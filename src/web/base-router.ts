@@ -1,4 +1,4 @@
-import { Configuration } from '@/utils/config'
+import { Config } from '@/utils/config'
 import { WebPush } from '@/utils/web-push'
 import { FastifyInstance } from 'fastify'
 
@@ -7,13 +7,13 @@ import { FastifyInstance } from 'fastify'
  */
 export abstract class BaseRouter {
   protected fastify: FastifyInstance
-  protected config: Configuration
+  protected config: Config
   protected webPush: WebPush
   protected version: string
 
   constructor(
     fastify: FastifyInstance,
-    config: Configuration,
+    config: Config,
     webPush: WebPush,
     version: string
   ) {

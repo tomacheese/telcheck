@@ -12,7 +12,7 @@ export class Checked {
   }
 
   public static isChecked(date: string, time: string): boolean {
-    const checked = Checked.load()
+    const checked = this.load()
     if (!checked) {
       return false
     }
@@ -23,12 +23,12 @@ export class Checked {
 
   public static check(date: string, time: string): void {
     const dateObject = this.convertDate(date, time)
-    const previousChecked = Checked.load()
+    const previousChecked = this.load()
     if (previousChecked && new Date(previousChecked.datetime) >= dateObject) {
       return
     }
 
-    Checked.save({
+    this.save({
       datetime: dateObject.toISOString(),
     })
   }

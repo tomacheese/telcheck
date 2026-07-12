@@ -1,7 +1,7 @@
 // axios 削除
 
 import { load } from 'cheerio'
-import { Configuration, PATH } from './config'
+import { Config, PATH } from './config'
 import fs from 'node:fs'
 import { Logger } from '@book000/node-utils'
 
@@ -96,14 +96,14 @@ class TelNavi extends BaseSearchNumber {
   }
 
   public async search(number: string): Promise<PhoneDetailResult> {
-    const res = await fetch(`https://telnavi.jp/phone/${number}`, {
+    const response = await fetch(`https://telnavi.jp/phone/${number}`, {
       signal: AbortSignal.timeout(10_000),
       headers: { 'User-Agent': 'Mozilla/5.0 (compatible; telcheck)' },
     })
-    if (!res.ok) {
-      throw new Error(`Failed to get telnavi: ${res.status}`)
+    if (!response.ok) {
+      throw new Error(`Failed to get telnavi: ${response.status}`)
     }
-    const html = await res.text()
+    const html = await response.text()
     const $ = load(html)
     const title = $('title').text()
     const match = this.titleRegex.exec(title)
@@ -119,9 +119,9 @@ class TelNavi extends BaseSearchNumber {
 }
 
 class GoogleSearch extends BaseSearchNumber {
-  private readonly config: Configuration
+  private readonly config: Config
 
-  constructor(config: Configuration) {
+  constructor(config: Config) {
     super('Google検索')
 
     this.config = config
@@ -137,13 +137,13 @@ class GoogleSearch extends BaseSearchNumber {
     const searchCx = this.config.google_search.cx
 
     const url = `https://www.googleapis.com/customsearch/v1?key=${searchKey}&cx=${searchCx}&lr=lang_ja&q="${number}"`
-    const res = await fetch(url, {
+    const response = await fetch(url, {
       signal: AbortSignal.timeout(10_000),
     })
-    if (!res.ok) {
-      throw new Error(`Failed to get google search: ${res.status}`)
+    if (!response.ok) {
+      throw new Error(`Failed to get google search: ${response.status}`)
     }
-    const data: GoogleCustomSearchResponse = await res.json()
+    const data: GoogleCustomSearchResponse = await response.json()
     if (!data.items) {
       return null
     }
@@ -162,7 +162,7 @@ class GoogleSearch extends BaseSearchNumber {
 }
 
 export async function searchNumber(
-  config: Configuration,
+  config: Config,
   number: string
 ): Promise<PhoneDetailResult> {
   const logger = Logger.configure('GoogleSearch::searchNumber')
@@ -173,10 +173,13 @@ export async function searchNumber(
     new GoogleSearch(config),
   ]
   for (const searcher of searchers) {
-    const result = await searcher.search(number).catch((error: unknown) => {
+    let result: PhoneDetailResult | null
+    try {
+      result = await searcher.search(number)
+    } catch (error) {
       logger.error('Failed to search number', error as Error)
-      return null
-    })
+      result = null
+    }
     if (result) {
       return result
     }

@@ -70,7 +70,7 @@ interface Self {
   condition: Conditions
 }
 
-export interface Configuration {
+export interface Config {
   destinations: IDestination[]
   selfs: Self[]
   router: {
@@ -172,11 +172,11 @@ function checkConfig(config: any): Record<string, boolean> {
   return results
 }
 
-const isConfig = (config: any): config is Configuration => {
+const isConfig = (config: any): config is Config => {
   return Object.values(checkConfig(config)).every(Boolean)
 }
 
-export function loadConfig(): Configuration {
+export function loadConfig(): Config {
   if (!fs.existsSync(PATH.CONFIG_FILE)) {
     throw new Error('Config file not found')
   }

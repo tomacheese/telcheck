@@ -15,7 +15,7 @@
     "type": "git"
   },
   "scripts": {
-    "generate-schema": "typescript-json-schema --required tsconfig.json Configuration -o schema/Configuration.json",
+    "generate-schema": "typescript-json-schema --required tsconfig.json Config -o schema/Configuration.json",
     "lint:prettier": "prettier --check src",
     "lint:tsc": "tsc",
     "fix:eslint": "eslint . -c eslint.config.mjs --fix",

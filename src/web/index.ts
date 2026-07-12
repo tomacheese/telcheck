@@ -2,14 +2,14 @@ import fastify from 'fastify'
 import cors from '@fastify/cors'
 import { ApiRouter } from './api'
 import { BaseRouter } from './base-router'
-import { Configuration } from '@/utils/config'
+import { Config } from '@/utils/config'
 import { WebPush } from '@/utils/web-push'
 import { Logger } from '@book000/node-utils'
 import { ViewRouter } from './view'
 import fastifyBasicAuth from '@fastify/basic-auth'
 import fs from 'node:fs'
 
-export async function buildWebApp(config: Configuration, webPush: WebPush) {
+export async function buildWebApp(config: Config, webPush: WebPush) {
   const logger = Logger.configure('buildWebApp')
 
   const app = fastify()

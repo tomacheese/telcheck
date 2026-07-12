@@ -13,10 +13,7 @@ async function isWebPushSupported() {
   try {
     const sw = await navigator.serviceWorker.ready
     // 利用可能になったサービスワーカーがpushManagerプロパティがあればPush APIに対応しているとみなす
-    if (!('pushManager' in sw)) {
-      return false
-    }
-    return true
+    return !!('pushManager' in sw)
   } catch {
     return false
   }
@@ -71,18 +68,15 @@ async function subscribe(destinationName) {
     if (result === 'default') {
       throw new Error('Permission prompt dismissed.')
     }
-  }
-  if (globalThis.Notification.permission === 'denied') {
+  } else if (globalThis.Notification.permission === 'denied') {
     throw new Error('Permission denied.')
   }
 
-  const currentLocalSubscription = await navigator.serviceWorker.ready.then(
-    (worker) =>
-      worker.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: validPublicKey,
-      })
-  )
+  const worker = await navigator.serviceWorker.ready
+  const currentLocalSubscription = await worker.pushManager.subscribe({
+    userVisibleOnly: true,
+    applicationServerKey: validPublicKey,
+  })
 
   const subscriptionJSON = currentLocalSubscription.toJSON()
   if (
@@ -108,10 +102,7 @@ async function subscribe(destinationName) {
         },
       }),
     })
-    if (!response.ok) {
-      return false
-    }
-    return true
+    return !!response.ok
   } catch {
     return false
   }
@@ -153,11 +144,7 @@ async function unsubscribe(destinationName) {
     throw new Error('Already unsubscribed.')
   }
 
-  if (!response.ok) {
-    return false
-  }
-
-  return true
+  return !!response.ok
 }
 
 async function main() {
@@ -186,8 +173,7 @@ async function main() {
   }
 
   forceReloadButton.addEventListener('click', () => {
-    // @ts-expect-error reload argument is not in the spec
-    globalThis.location.reload(true)
+    globalThis.location.reload()
   })
 
   const isSupported = await isWebPushSupported()
@@ -199,12 +185,11 @@ async function main() {
 
   subscribeButton.disabled = true
   unsubscribeButton.disabled = true
-  initDestinationNameSelect(destinationNameSelect).then(() => {
-    subscribeButton.disabled = false
-    unsubscribeButton.disabled = false
+  await initDestinationNameSelect(destinationNameSelect)
+  subscribeButton.disabled = false
+  unsubscribeButton.disabled = false
 
-    modal.classList.remove('is-active')
-  })
+  modal.classList.remove('is-active')
 
   subscribeButton.addEventListener('click', async () => {
     try {

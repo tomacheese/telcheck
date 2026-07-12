@@ -108,7 +108,7 @@ export class ApiRouter extends BaseRouter {
     reply: FastifyReply
   ) {
     const subscription = request.body
-    const result = this.webPush.removeSubscription(subscription)
-    await reply.code(result ? 200 : 404).send()
+    const isRemoved = this.webPush.removeSubscription(subscription)
+    await reply.code(isRemoved ? 200 : 404).send()
   }
 }

@@ -51,7 +51,7 @@ export class NVR510 {
 
   public async getDashboardSyslog(): Promise<SyslogItem[]> {
     // http://192.168.0.1/dashboard/syslog_data.csv?num=100
-    const res = await fetch(
+    const response = await fetch(
       `http://${this.ip}/dashboard/syslog_data.csv?num=100`,
       {
         headers: {
@@ -62,10 +62,10 @@ export class NVR510 {
         signal: AbortSignal.timeout(10_000),
       }
     )
-    if (!res.ok) {
-      throw new Error(`Failed to get syslog: ${res.status}`)
+    if (!response.ok) {
+      throw new Error(`Failed to get syslog: ${response.status}`)
     }
-    const text = await res.text()
+    const text = await response.text()
     const data = text
       .replaceAll('&nbsp;', ' ')
       .replaceAll('<br>', '')

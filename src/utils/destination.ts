@@ -27,13 +27,13 @@ class DiscordWebhookDestination extends BaseDestination {
   }
 
   public async send(message: string): Promise<void> {
-    const res = await fetchWithKeepAlive(this.url, {
+    const response = await fetchWithKeepAlive(this.url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ content: message }),
     })
-    if (!res.ok && res.status !== 204) {
-      throw new Error(`Discord webhook failed (${res.status})`)
+    if (!response.ok && response.status !== 204) {
+      throw new Error(`Discord webhook failed (${response.status})`)
     }
   }
 }
@@ -47,7 +47,7 @@ class DiscordBotDestination extends BaseDestination {
   }
 
   public async send(message: string): Promise<void> {
-    const res = await fetchWithKeepAlive(
+    const response = await fetchWithKeepAlive(
       `https://discord.com/api/channels/${this.channelId}/messages`,
       {
         method: 'POST',
@@ -58,8 +58,8 @@ class DiscordBotDestination extends BaseDestination {
         body: JSON.stringify({ content: message }),
       }
     )
-    if (!res.ok && res.status !== 204) {
-      throw new Error(`Discord bot message failed (${res.status})`)
+    if (!response.ok && response.status !== 204) {
+      throw new Error(`Discord bot message failed (${response.status})`)
     }
   }
 }
@@ -70,13 +70,13 @@ class SlackDestination extends BaseDestination {
   }
 
   public async send(message: string): Promise<void> {
-    const res = await fetchWithKeepAlive(this.url, {
+    const response = await fetchWithKeepAlive(this.url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text: message }),
     })
-    if (!res.ok) {
-      throw new Error(`Slack webhook failed (${res.status})`)
+    if (!response.ok) {
+      throw new Error(`Slack webhook failed (${response.status})`)
     }
   }
 }
@@ -89,7 +89,7 @@ class LINENotifyDestination extends BaseDestination {
   public async send(message: string): Promise<void> {
     const parameters = new URLSearchParams()
     parameters.append('message', message)
-    const res = await fetchWithKeepAlive(
+    const response = await fetchWithKeepAlive(
       'https://notify-api.line.me/api/notify',
       {
         method: 'POST',
@@ -99,8 +99,8 @@ class LINENotifyDestination extends BaseDestination {
         body: parameters,
       }
     )
-    if (!res.ok) {
-      throw new Error(`LINE Notify failed (${res.status})`)
+    if (!response.ok) {
+      throw new Error(`LINE Notify failed (${response.status})`)
     }
   }
 }
