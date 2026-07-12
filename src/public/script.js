@@ -1,4 +1,3 @@
- 
 /* global alert */
 
 async function isWebPushSupported() {
@@ -13,7 +12,7 @@ async function isWebPushSupported() {
   try {
     const sw = await navigator.serviceWorker.ready
     // 利用可能になったサービスワーカーがpushManagerプロパティがあればPush APIに対応しているとみなす
-    return !!('pushManager' in sw);
+    return !!('pushManager' in sw)
   } catch {
     return false
   }
@@ -104,7 +103,7 @@ async function subscribe(destinationName) {
         },
       }),
     })
-    return !!response.ok;
+    return !!response.ok
   } catch {
     return false
   }
@@ -146,7 +145,7 @@ async function unsubscribe(destinationName) {
     throw new Error('Already unsubscribed.')
   }
 
-  return !!response.ok;
+  return !!response.ok
 }
 
 async function main() {
@@ -223,7 +222,6 @@ async function main() {
   })
 }
 
- 
 ;(async () => {
   try {
     await main()

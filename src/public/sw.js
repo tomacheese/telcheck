@@ -1,4 +1,3 @@
- 
 /* global clients */
 
 globalThis.addEventListener('push', (event) => {
