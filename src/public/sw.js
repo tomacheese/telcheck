@@ -1,4 +1,3 @@
-/* eslint-disable unicorn/no-null */
 /* global clients */
 
 globalThis.addEventListener('push', (event) => {
