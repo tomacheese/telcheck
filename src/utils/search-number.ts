@@ -74,7 +74,7 @@ class Phones extends BaseSearchNumber {
       .toString()
       .replaceAll('\r', '')
     const phones = tsv.split('\n').map((line) => {
-      const [name, number] = line.split('\t')
+      const [name, number] = line.split('\t', 2)
       return { name, number }
     })
     const result = phones.find((phone) => phone.number === number)
