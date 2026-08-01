@@ -1,6 +1,6 @@
 import { Logger } from '@book000/node-utils'
 import fs from 'node:fs'
-import webpush from 'web-push'
+import webpush, { WebPushError } from 'web-push'
 
 interface IWebPushKey {
   vapid: {
@@ -76,7 +76,9 @@ export class WebPush {
   public removeSubscription(subscription: Subscription): boolean {
     const subscriptions = this.getSubscriptions()
     const index = subscriptions.findIndex(
-      (s) => s.endpoint === subscription.endpoint
+      (s) =>
+        s.destinationName === subscription.destinationName &&
+        s.endpoint === subscription.endpoint
     )
     if (index === -1) {
       return false
@@ -84,6 +86,22 @@ export class WebPush {
     subscriptions.splice(index, 1)
     this.saveSubscriptions(subscriptions)
     return true
+  }
+
+  /**
+   * 指定した endpoint を持つ購読情報をすべて削除する
+   *
+   * 同一 endpoint が複数の destinationName で購読されている場合があるため、
+   * 購読が失効した際は destinationName を問わず一括で除去する。
+   * @param endpoint 削除対象の購読 endpoint
+   */
+  private removeSubscriptionsByEndpoint(endpoint: string): void {
+    const subscriptions = this.getSubscriptions()
+    const remaining = subscriptions.filter((s) => s.endpoint !== endpoint)
+    if (remaining.length === subscriptions.length) {
+      return
+    }
+    this.saveSubscriptions(remaining)
   }
 
   public getSubscriptions(): Subscription[] {
@@ -108,7 +126,7 @@ export class WebPush {
     payload: string
   ): Promise<number> {
     const logger = Logger.configure('WebPush.sendNotification')
-    const response = await webpush
+    const statusCode = await webpush
       .sendNotification(subscription, payload, {
         vapidDetails: {
           subject: `mailto:${process.env.WEB_PUSH_EMAIL}`,
@@ -116,15 +134,25 @@ export class WebPush {
           privateKey: this.vapidPrivateKey,
         },
       })
+      .then((result) => result.statusCode)
       .catch((error: unknown) => {
+        // 404・410 は購読が失効していることを示す想定内のレスポンスのため、
+        // エラー扱いにせず購読情報を削除して以後の送信対象から除外する
+        if (
+          error instanceof WebPushError &&
+          (error.statusCode === 404 || error.statusCode === 410)
+        ) {
+          logger.warn(
+            `Subscription is no longer valid, removing: ${new URL(subscription.endpoint).origin} (${subscription.destinationName})`
+          )
+          this.removeSubscriptionsByEndpoint(subscription.endpoint)
+          return error.statusCode
+        }
         logger.error('Error sending notification', error as Error)
+        return undefined
       })
 
-    if (!response) {
-      return 500
-    }
-
-    return response.statusCode
+    return statusCode ?? 500
   }
 
   public async sendNotifications(
@@ -167,11 +195,13 @@ export class WebPush {
         results.filter((r) => r === 201).length
       } subscriptions!`
     )
-    if (results.some((r) => r !== 201)) {
+    // 404・410 は失効購読として sendNotification 側で既に処理済みのため、失敗数には含めない
+    const failureCount = results.filter(
+      (r) => r !== 201 && r !== 404 && r !== 410
+    ).length
+    if (failureCount > 0) {
       logger.warn(
-        `Failed to send notification to ${
-          results.filter((r) => r !== 201).length
-        } subscriptions.`
+        `Failed to send notification to ${failureCount} subscriptions.`
       )
     }
   }
