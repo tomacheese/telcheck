@@ -1,0 +1,5 @@
+data/config.json
+data/web-push-key.json
+data/web-push-subscriptions.json
+data/phones.tsv
+data/checked.json
