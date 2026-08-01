@@ -33,6 +33,28 @@ export interface GoogleSearchResult {
 
 export type PhoneDetailResult = PhoneDetail | GoogleSearchResult | null
 
+/**
+ * 検索先サービスから返された HTTP エラーレスポンスを表すエラー
+ *
+ * アクセス制限による想定内の失敗かどうかは検索先サービスごとに意味が異なる
+ * (例: TelNavi の 403 は bot ブロック、Google Custom Search の 403 は
+ * キー設定不備やクォータ超過の可能性がある)ため、判定は throw 側で行い、
+ * 結果を `expected` に保持する。
+ * @param serviceLabel エラーメッセージに表示するサービス名
+ * @param status HTTP ステータスコード
+ * @param expected 呼び出し元でフォールバックのみで済む想定内の失敗かどうか
+ */
+class SearchNumberHttpError extends Error {
+  constructor(
+    serviceLabel: string,
+    public readonly status: number,
+    public readonly expected: boolean
+  ) {
+    super(`Failed to get ${serviceLabel}: ${status}`)
+    this.name = 'SearchNumberHttpError'
+  }
+}
+
 class BaseSearchNumber {
   public readonly serviceName: string
   constructor(serviceName: string) {
@@ -101,7 +123,13 @@ class TelNavi extends BaseSearchNumber {
       headers: { 'User-Agent': 'Mozilla/5.0 (compatible; telcheck)' },
     })
     if (!res.ok) {
-      throw new Error(`Failed to get telnavi: ${res.status}`)
+      // telnavi.jp は bot ブロックとして 403・429 を返すことがあり、
+      // 次の検索先へフォールバックするだけで済む想定内の失敗として扱う
+      throw new SearchNumberHttpError(
+        'telnavi',
+        res.status,
+        res.status === 403 || res.status === 429
+      )
     }
     const html = await res.text()
     const $ = load(html)
@@ -141,7 +169,13 @@ class GoogleSearch extends BaseSearchNumber {
       signal: AbortSignal.timeout(10_000),
     })
     if (!res.ok) {
-      throw new Error(`Failed to get google search: ${res.status}`)
+      // 403 はキー設定不備やクォータ超過など人による対応が必要な失敗の
+      // 可能性があるため想定内には含めず、429（レート制限）のみ想定内とする
+      throw new SearchNumberHttpError(
+        'google search',
+        res.status,
+        res.status === 429
+      )
     }
     const data: GoogleCustomSearchResponse = await res.json()
     if (!data.items) {
@@ -174,6 +208,12 @@ export async function searchNumber(
   ]
   for (const searcher of searchers) {
     const result = await searcher.search(number).catch((error: unknown) => {
+      // 各検索先で想定内と判定されたアクセス制限は、次の検索先へ
+      // フォールバックするだけで済むため warn に留める
+      if (error instanceof SearchNumberHttpError && error.expected) {
+        logger.warn(`Failed to search number: ${error.message}`)
+        return null
+      }
       logger.error('Failed to search number', error as Error)
       return null
     })
