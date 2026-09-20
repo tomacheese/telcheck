@@ -72,13 +72,12 @@ class AnonymousCall extends BaseSearchNumber {
   }
 
   public search(number: string): Promise<PhoneDetailResult> {
-    if (number === 'anonymous') {
-      return Promise.resolve({
-        name: '非通知着信',
-        source: this.serviceName,
-      })
-    }
-    return Promise.resolve(null)
+    return number === 'anonymous'
+      ? Promise.resolve({
+          name: '非通知着信',
+          source: this.serviceName,
+        })
+      : Promise.resolve(null)
   }
 }
 
@@ -100,13 +99,12 @@ class Phones extends BaseSearchNumber {
       return { name, number }
     })
     const result = phones.find((phone) => phone.number === number)
-    if (result) {
-      return Promise.resolve({
-        name: result.name,
-        source: this.serviceName,
-      })
-    }
-    return Promise.resolve(null)
+    return result
+      ? Promise.resolve({
+          name: result.name,
+          source: this.serviceName,
+        })
+      : Promise.resolve(null)
   }
 }
 
@@ -135,14 +133,12 @@ class TelNavi extends BaseSearchNumber {
     const $ = load(html)
     const title = $('title').text()
     const match = this.titleRegex.exec(title)
-    if (match) {
-      return {
-        name: match[1],
-        source: this.serviceName,
-      }
-    }
-
-    return null
+    return match
+      ? {
+          name: match[1],
+          source: this.serviceName,
+        }
+      : null
   }
 }
 

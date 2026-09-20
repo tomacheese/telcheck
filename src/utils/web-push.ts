@@ -107,12 +107,11 @@ export class WebPush {
   public getSubscriptions(): Subscription[] {
     const subscriptionsPath =
       process.env.WEB_PUSH_SUBSCRIPTIONS_PATH ?? 'data/subscriptions.json'
-    if (!fs.existsSync(subscriptionsPath)) {
-      return []
-    }
-    return JSON.parse(
-      fs.readFileSync(subscriptionsPath, 'utf8')
-    ) as Subscription[]
+    return fs.existsSync(subscriptionsPath)
+      ? (JSON.parse(
+          fs.readFileSync(subscriptionsPath, 'utf8')
+        ) as Subscription[])
+      : []
   }
 
   private saveSubscriptions(subscriptions: Subscription[]): void {

@@ -53,10 +53,9 @@ function getStatusText(
 }
 
 function getCallerName(callerResult: PhoneDetailResult) {
-  if (!callerResult || !isPhoneDetail(callerResult)) {
-    return '不明'
-  }
-  return callerResult.name
+  return !callerResult || !isPhoneDetail(callerResult)
+    ? '不明'
+    : callerResult.name
 }
 
 function getIDestinations(
@@ -80,10 +79,7 @@ function getSelfName(config: Configuration, detail: CallDetail): string {
       ([key, value]) => value && new RegExp(value).test(detail[key])
     )
   )
-  if (self) {
-    return self.name
-  }
-  return 'UNKNOWN'
+  return self ? self.name : 'UNKNOWN'
 }
 
 function getNotGoogleSearchMessage(
