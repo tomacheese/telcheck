@@ -124,12 +124,8 @@ export class NVR510 {
     }
 
     // 2023/02/01 20:14:27: [SIP] SIP Call from [sip:0123456789@192.168.0.1] to [sip:10@192.168.0.1] disconnected Normally (0).
-    if (status.startsWith('disconnected')) {
-      return 'disconnected'
-    }
-
     // 2023/02/01 20:12:37: [SIP] SIP Call from [sip:0123456789@192.168.0.1] to [sip:10@192.168.0.1].
-    return 'connecting'
+    return status.startsWith('disconnected') ? 'disconnected' : 'connecting'
   }
 
   private parseSyslog(data: string): SyslogItem[] {
