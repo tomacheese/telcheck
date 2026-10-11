@@ -176,8 +176,8 @@ importers:
         specifier: 6.3.0
         version: 6.3.0
       '@fastify/cors':
-        specifier: 11.3.0
-        version: 11.3.0
+        specifier: 11.3.1
+        version: 11.3.1
       '@types/cheerio':
         specifier: 1.0.0
         version: 1.0.0
@@ -512,8 +512,8 @@ packages:
   '@fastify/basic-auth@6.3.0':
     resolution: {integrity: sha512-Yohe3nQ8J3xtYXoryDwrVj1bYEJRq+kNPU1Sdv7w0Nh45JyyflVpCttyfzioc/JnHJ/i0CKpVwW2K+5fGMW/pQ==}
 
-  '@fastify/cors@11.3.0':
-    resolution: {integrity: sha512-ggQGua+xHv1MvePbPr0v//xLYEsCXbWspquXCJS9Ot5YoRXq8J8ZWzHnxDBVnbtXosvistXo6LtNzOJswf64Fw==}
+  '@fastify/cors@11.3.1':
+    resolution: {integrity: sha512-gZXNzd6FLHzOIfvoK4+Az3Wko2V6Y0MIsLxpyo4AEYl7a9q1JBPwPaxLea4nkr++8FCiJiPpYYo6E02uZW0dqw==}
 
   '@fastify/error@4.2.0':
     resolution: {integrity: sha512-RSo3sVDXfHskiBZKBPRgnQTtIqpi/7zhJOEmAxCiBcM7d0uwdGdxLlsCaLzGs8v8NnxIRlfG0N51p5yFaOentQ==}
@@ -2844,7 +2844,7 @@ snapshots:
       '@fastify/error': 4.2.0
       fastify-plugin: 6.0.0
 
-  '@fastify/cors@11.3.0':
+  '@fastify/cors@11.3.1':
     dependencies:
       fastify-plugin: 6.0.0
       toad-cache: 3.7.4
