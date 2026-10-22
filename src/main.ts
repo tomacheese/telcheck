@@ -5,7 +5,8 @@ import {
   IDestination,
   loadConfig,
 } from './utils/config'
-import { getDestination } from './utils/destination'
+import { deliver } from './utils/deliver'
+import { DeliveryState } from './utils/delivery-state'
 import { Logger } from '@book000/node-utils'
 import { NVR510, SyslogCall } from './utils/nvr510'
 import {
@@ -163,9 +164,6 @@ async function checker(config: Configuration) {
     }
     const selfName = getSelfName(config, callDetail)
     const destinationConfigs = getIDestinations(config, callDetail)
-    const destinations = destinationConfigs
-      ? destinationConfigs.map((d) => getDestination(d))
-      : []
 
     const callerName = getCallerName(callerResult)
     const source = callerResult ? callerResult.source : '不明'
@@ -189,11 +187,25 @@ async function checker(config: Configuration) {
           selfName
         )
 
-    if (!isFirst && destinations.length > 0) {
-      await Promise.all(destinations.map((d) => d.send(message)))
+    if (!isFirst && destinationConfigs) {
+      // 一部の宛先が失敗した場合は例外が投げられ、チェック済みにしない。
+      // 次回の再試行では、送信に成功した宛先は除外される。
+      await deliver(
+        DeliveryState.getEventKey(
+          call.date,
+          call.time,
+          call.direction,
+          call.fromNumber,
+          call.toNumber,
+          call.status
+        ),
+        destinationConfigs,
+        message
+      )
     }
 
     Checked.check(call.date, call.time)
+    DeliveryState.clear()
   }
 }
 
@@ -228,8 +240,9 @@ async function main() {
     await checker(config)
       // eslint-disable-next-line @typescript-eslint/no-empty-function
       .then(() => {})
-      // eslint-disable-next-line @typescript-eslint/no-empty-function
-      .catch(() => {})
+      .catch((error: unknown) => {
+        logger.error('❌ checker() failed', error as Error)
+      })
     await new Promise((resolve) => setTimeout(resolve, 1000))
   }
 }
