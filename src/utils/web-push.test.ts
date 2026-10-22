@@ -61,9 +61,7 @@ describe('WebPush', () => {
   let directory: string
   let subscriptionsPath: string
   let webPush: WebPush
-  // シングルトンが再送待ちの状態を保持するため、テストごとに通知内容を変える
-  let body = ''
-  let sequence = 0
+  const body = 'body'
 
   before(() => {
     directory = fs.mkdtempSync(path.join(os.tmpdir(), 'telcheck-web-push-'))
@@ -75,8 +73,6 @@ describe('WebPush', () => {
   })
 
   beforeEach(() => {
-    sequence++
-    body = `body-${sequence}`
     fs.writeFileSync(
       subscriptionsPath,
       JSON.stringify([createSubscription('a')], null, 2)
@@ -175,18 +171,41 @@ describe('WebPush', () => {
             : Promise.resolve({ statusCode: 201, body: '', headers: {} })
         }
       )
+      const delivered = new Set<string>()
       await assert.rejects(
-        webPush.sendNotifications(DESTINATION, 'title', body)
+        webPush.sendNotifications(DESTINATION, 'title', body, delivered)
       )
-      await webPush.sendNotifications(DESTINATION, 'title', body)
+      await webPush.sendNotifications(DESTINATION, 'title', body, delivered)
       // 1 回目: a, b, c / 2 回目: 失敗した b のみ
       assert.deepEqual(
         endpoints.map((endpoint) => endpoint.slice(-1)),
         ['a', 'b', 'c', 'b']
       )
-      // 全購読に送信できた後は状態が破棄され、次の通知は全購読へ送信される
-      await webPush.sendNotifications(DESTINATION, 'title', body)
-      assert.equal(endpoints.length, 7)
+    })
+
+    it('同じ内容でも、別の通話 (別の送信済み Set) の通知は全購読へ送信する', async () => {
+      writeSubscriptions(['a', 'b'])
+      const endpoints: string[] = []
+      mock.method(
+        webpush,
+        'sendNotification',
+        (subscription: { endpoint: string }) => {
+          endpoints.push(subscription.endpoint)
+          return subscription.endpoint.endsWith('/b') && endpoints.length <= 2
+            ? Promise.reject(createPushError(503))
+            : Promise.resolve({ statusCode: 201, body: '', headers: {} })
+        }
+      )
+      // 通話 A: a は成功、b は一時的に失敗し、そのまま再送されずに終わる
+      await assert.rejects(
+        webPush.sendNotifications(DESTINATION, 'title', body, new Set())
+      )
+      // 通話 B: 同じタイトル・本文でも a・b の両方へ送信される
+      await webPush.sendNotifications(DESTINATION, 'title', body, new Set())
+      assert.deepEqual(
+        endpoints.map((endpoint) => endpoint.slice(-1)),
+        ['a', 'b', 'a', 'b']
+      )
     })
 
     it('購読が 0 件の場合は何も送信せず正常終了する', async () => {

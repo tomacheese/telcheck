@@ -8,9 +8,11 @@ import { DeliverableDestination, DeliveryTracker } from './delivery'
 function createDestination(failures = 0) {
   let remaining = failures
   const messages: string[] = []
+  const progresses: Set<string>[] = []
   const destination: DeliverableDestination = {
-    send(message: string) {
+    send(message: string, progress: Set<string>) {
       messages.push(message)
+      progresses.push(progress)
       if (remaining > 0) {
         remaining--
         return Promise.reject(new Error('send failed'))
@@ -18,7 +20,7 @@ function createDestination(failures = 0) {
       return Promise.resolve()
     },
   }
-  return { destination, messages }
+  return { destination, messages, progresses }
 }
 
 describe('DeliveryTracker', () => {
@@ -130,5 +132,29 @@ describe('DeliveryTracker', () => {
       Promise.resolve('message')
     )
     assert.deepEqual(a.messages, ['message'])
+  })
+
+  it('宛先内の進捗は同じ通話の再送時にだけ引き継ぎ、別の通話には引き継がない', async () => {
+    const tracker = new DeliveryTracker()
+    const ng = createDestination(1)
+    const createMessage = () => Promise.resolve('message')
+
+    // 通話 A: 失敗後に再送する。同じ Set が渡される
+    await assert.rejects(
+      tracker.deliver('call-a', [ng.destination], createMessage)
+    )
+    await tracker.deliver('call-a', [ng.destination], createMessage)
+    assert.equal(ng.progresses[0], ng.progresses[1])
+
+    // 通話 A が失敗したまま対象から外れた後、同じ内容の通話 B は新しい Set で送信される
+    const ng2 = createDestination(1)
+    await assert.rejects(
+      tracker.deliver('call-a2', [ng2.destination], createMessage)
+    )
+    ng2.progresses[0].add('https://push.example.com/a')
+    tracker.prune(new Set(['call-b']))
+    await tracker.deliver('call-b', [ng2.destination], createMessage)
+    assert.notEqual(ng2.progresses[0], ng2.progresses[1])
+    assert.equal(ng2.progresses[1].size, 0)
   })
 })

@@ -2,7 +2,14 @@ import { Logger } from '@book000/node-utils'
 
 /** 通知の送信先 */
 export interface DeliverableDestination {
-  send(message: string): Promise<void>
+  /**
+   * メッセージを送信する
+   * @param message 送信するメッセージ
+   * @param progress 宛先内で送信済みの項目 (Web Push の購読 endpoint など) を記録する Set。
+   *   同じ通話・同じ宛先への再送時に同じ Set が渡される。宛先内の一部だけが失敗した場合に、
+   *   送信済みの項目へ重複して送らないために使う。不要な宛先は無視してよい
+   */
+  send(message: string, progress: Set<string>): Promise<void>
 }
 
 /** 1 つの通話に対する配送状態 */
@@ -11,6 +18,8 @@ interface DeliveryState {
   message: string
   /** 送信に成功した宛先の index (その通話に対する宛先配列の index) */
   delivered: Set<number>
+  /** 宛先 index ごとの、宛先内の送信済み項目。通話の状態と同じ寿命で破棄される */
+  progress: Map<number, Set<string>>
 }
 
 /**
@@ -50,7 +59,11 @@ export class DeliveryTracker {
     const logger = Logger.configure('DeliveryTracker.deliver')
     let state = this.states.get(key)
     if (!state) {
-      state = { message: await createMessage(), delivered: new Set() }
+      state = {
+        message: await createMessage(),
+        delivered: new Set(),
+        progress: new Map(),
+      }
       this.states.set(key, state)
     }
     const current = state
@@ -59,7 +72,14 @@ export class DeliveryTracker {
       .map((destination, index) => ({ destination, index }))
       .filter(({ index }) => !current.delivered.has(index))
     const results = await Promise.allSettled(
-      pending.map(({ destination }) => destination.send(current.message))
+      pending.map(({ destination, index }) => {
+        let progress = current.progress.get(index)
+        if (!progress) {
+          progress = new Set()
+          current.progress.set(index, progress)
+        }
+        return destination.send(current.message, progress)
+      })
     )
 
     const failures: string[] = []

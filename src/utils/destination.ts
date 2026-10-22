@@ -110,7 +110,10 @@ class WebPushDestination extends BaseDestination {
     super()
   }
 
-  public async send(message: string): Promise<void> {
+  public async send(
+    message: string,
+    progress: Set<string> = new Set<string>()
+  ): Promise<void> {
     if (!message.includes('\n')) {
       return
     }
@@ -125,7 +128,7 @@ class WebPushDestination extends BaseDestination {
     const body = rawBody.replaceAll('**', '').replaceAll('`', '').trim()
 
     const webPush = WebPush.getInstance()
-    await webPush.sendNotifications(this.destinationName, title, body)
+    await webPush.sendNotifications(this.destinationName, title, body, progress)
   }
 }
 

@@ -61,19 +61,8 @@ function isNetworkError(error: unknown): boolean {
   })
 }
 
-/** 送信に失敗した通知の配送状態を保持する最大件数 */
-const MAX_PENDING_DELIVERIES = 100
-
 export class WebPush {
   private static instance: WebPush | null = null
-
-  /**
-   * 一時的な失敗で再送待ちの通知について、送信済みの購読 endpoint を保持する
-   *
-   * 宛先内の一部の購読だけが失敗した場合に、再送で成功済みの購読へ重複通知しないための状態。
-   * キーは宛先名とペイロード。プロセス内メモリのみで保持する。
-   */
-  private readonly deliveredEndpoints = new Map<string, Set<string>>()
 
   public readonly vapidPublicKey: string
   private readonly vapidPrivateKey: string
@@ -241,10 +230,22 @@ export class WebPush {
       : 500
   }
 
+  /**
+   * 宛先に紐づく全購読へ通知を送信する
+   *
+   * 一時的に失敗した購読が 1 件でもあれば reject する。
+   * @param destinationName 宛先名
+   * @param title 通知タイトル
+   * @param body 通知本文
+   * @param delivered 送信済みの購読 endpoint。指定した場合、含まれる購読は送信対象から除外し、
+   *   今回送信が完了した購読 (失敗しても再送しないものを含む) を追加する。
+   *   再送時に成功済みの購読へ重複して送らないために、呼び出し元が通話ごとに保持して渡す
+   */
   public async sendNotifications(
     destinationName: string,
     title: string,
-    body: string
+    body: string,
+    delivered = new Set<string>()
   ): Promise<void> {
     const logger = Logger.configure('WebPush.sendNotifications')
     const subscriptions = this.getSubscriptions()
@@ -268,8 +269,6 @@ export class WebPush {
       },
     })
 
-    const deliveryKey = `${destinationName}\n${payload}`
-    const delivered = this.deliveredEndpoints.get(deliveryKey) ?? new Set()
     const targets = destinationSubscriptions.filter(
       (s) => !delivered.has(s.endpoint)
     )
@@ -295,22 +294,11 @@ export class WebPush {
       )
     }
 
-    if (counts.transient === 0) {
-      this.deliveredEndpoints.delete(deliveryKey)
-      return
+    // 一時的な失敗は呼び出し元へ伝え、通知済みとして扱われないようにする
+    if (counts.transient > 0) {
+      throw new Error(
+        `Failed to send web push notification to ${counts.transient} subscriptions (${destinationName})`
+      )
     }
-    // 一時的な失敗は呼び出し元へ伝え、通知済みとして扱われないようにする。
-    // 再送時は成功済みの購読を除外する
-    this.deliveredEndpoints.delete(deliveryKey)
-    this.deliveredEndpoints.set(deliveryKey, delivered)
-    if (this.deliveredEndpoints.size > MAX_PENDING_DELIVERIES) {
-      const oldest = this.deliveredEndpoints.keys().next().value
-      if (oldest !== undefined) {
-        this.deliveredEndpoints.delete(oldest)
-      }
-    }
-    throw new Error(
-      `Failed to send web push notification to ${counts.transient} subscriptions (${destinationName})`
-    )
   }
 }
