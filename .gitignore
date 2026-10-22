@@ -131,3 +131,6 @@ dist
 
 # pnpm
 .pnpm-store
+
+# Delivery state (per-call hashes and Web Push endpoints)
+data/delivery.json

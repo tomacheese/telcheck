@@ -6,6 +6,7 @@ import { SyslogCall } from './nvr510'
 export const PATH = {
   CONFIG_FILE: process.env.CONFIG_PATH ?? 'data/config.json',
   CHECKED_FILE: process.env.CHECKED_PATH ?? 'data/checked.json',
+  DELIVERY_FILE: process.env.DELIVERY_PATH ?? 'data/delivery.json',
   PHONES_FILE: process.env.PHONES_PATH ?? 'data/phones.tsv',
 }
 

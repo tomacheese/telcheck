@@ -132,7 +132,85 @@ class WebPushDestination extends BaseDestination {
   }
 }
 
-export function getDestination(destination: IDestination): BaseDestination {
+/** 伏せ字にする設定値の最小の長さ */
+const MIN_SECRET_LENGTH = 8
+
+/**
+ * ログに出力してよい形にエラーメッセージを整える
+ *
+ * `fetch()` の URL 解析エラーなどは、メッセージに元の URL 全体 (Webhook の秘密値を含む)
+ * を含むため、そのままログに出力しない。宛先設定の文字列値 (Webhook URL・トークンなど) を
+ * 伏せ字にした上で、残った URL 形式の文字列も伏せ字にする。
+ *
+ * @param error 捕捉したエラー
+ * @param config エラーが発生した宛先の設定
+ * @returns 機密値を除いたエラーメッセージ
+ */
+export function sanitizeErrorMessage(
+  error: unknown,
+  config: IDestination
+): string {
+  let message = error instanceof Error ? error.message : String(error)
+
+  const secrets = Object.entries(config)
+    .filter(
+      ([key, value]) =>
+        !['name', 'type', 'condition'].includes(key) &&
+        typeof value === 'string' &&
+        // 短い値 (チャンネル ID など) は秘密値ではなく、伏せるとログが読めなくなる
+        value.length >= MIN_SECRET_LENGTH
+    )
+    .map(([, value]) => value as string)
+    // 長い値から置換し、他の値を含む値が部分的に残らないようにする
+    .toSorted((a, b) => b.length - a.length)
+  for (const secret of secrets) {
+    message = message.replaceAll(secret, '[REDACTED]')
+  }
+
+  return message.replaceAll(/https?:\/\/\S+/gi, '[REDACTED_URL]')
+}
+
+/**
+ * 送信に失敗したときに、機密値を除いたメッセージのエラーに置き換える宛先
+ *
+ * 呼び出し元が `Error` をそのままログに出力しても、Webhook URL やトークンが
+ * 漏れないようにする。元のエラーは `cause` に引き継がない。
+ */
+class SafeErrorDestination extends BaseDestination {
+  constructor(
+    private readonly inner: {
+      send(message: string, progress?: Set<string>): Promise<void>
+    },
+    private readonly config: IDestination
+  ) {
+    super()
+  }
+
+  /**
+   * メッセージを送信する。失敗した場合は、機密値を除いたメッセージのエラーを投げる
+   *
+   * @param message 送信するメッセージ
+   * @param progress 宛先内で送信済みの項目を記録する Set
+   */
+  public async send(
+    message: string,
+    progress: Set<string> = new Set<string>()
+  ): Promise<void> {
+    try {
+      await this.inner.send(message, progress)
+    } catch (error) {
+      throw new Error(sanitizeErrorMessage(error, this.config))
+    }
+  }
+}
+
+/**
+ * 宛先の設定から、エラーのサニタイズ前の宛先を生成する
+ *
+ * @param destination 宛先の設定
+ * @returns 宛先
+ */
+function createDestination(destination: IDestination): BaseDestination {
   if (isDestinationDiscordWebhook(destination)) {
     return new DiscordWebhookDestination(destination.webhook_url)
   }
@@ -150,4 +228,16 @@ export function getDestination(destination: IDestination): BaseDestination {
   }
   // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
   throw new Error(`Unknown destination: ${destination}`)
+}
+
+/**
+ * 宛先の設定から宛先を生成する
+ *
+ * 送信に失敗した場合、機密値を除いたメッセージのエラーを投げる。
+ *
+ * @param destination 宛先の設定
+ * @returns 宛先
+ */
+export function getDestination(destination: IDestination): BaseDestination {
+  return new SafeErrorDestination(createDestination(destination), destination)
 }

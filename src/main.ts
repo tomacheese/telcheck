@@ -4,8 +4,10 @@ import {
   Configuration,
   IDestination,
   loadConfig,
+  PATH,
 } from './utils/config'
 import { DeliveryTracker } from './utils/delivery'
+import { FileDeliveryStore, getDestinationKeys } from './utils/delivery-store'
 import { getDestination } from './utils/destination'
 import { Logger } from '@book000/node-utils'
 import { NVR510, SyslogCall } from './utils/nvr510'
@@ -121,8 +123,13 @@ function getGoogleSearchMessage(
   ].join('\n')
 }
 
-/** 通話ごとの配送状態。送信に失敗した宛先にだけ再送するためにループをまたいで保持する */
-const deliveryTracker = new DeliveryTracker()
+/**
+ * 通話ごとの配送状態。送信に失敗した宛先にだけ再送するためにループをまたいで保持し、
+ * 再起動後も成功済みの宛先へ重複して送らないよう永続化する
+ */
+const deliveryTracker = new DeliveryTracker(
+  new FileDeliveryStore(PATH.DELIVERY_FILE)
+)
 
 /**
  * 通話を一意に識別するキーを返す
@@ -219,7 +226,8 @@ async function checker(config: Configuration) {
       await deliveryTracker.deliver(
         getCallKey(call),
         destinations,
-        createMessage
+        createMessage,
+        getDestinationKeys(destinationConfigs ?? [])
       )
     }
 
