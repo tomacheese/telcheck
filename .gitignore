@@ -134,3 +134,4 @@ dist
 
 # Delivery state (per-call hashes and Web Push endpoints)
 data/delivery.json
+data/.delivery.json.tmp

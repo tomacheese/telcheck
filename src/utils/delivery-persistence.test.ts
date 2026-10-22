@@ -208,7 +208,7 @@ describe('DeliveryTracker の永続化', () => {
     assert.deepEqual(ok.messages, ['message'])
   })
 
-  it('保存された配送状態に電話番号などの通話キーを平文で含めない', async () => {
+  it('保存された配送状態に、電話番号などの通話キーを平文で含めない', async () => {
     const store = new FileDeliveryStore(filePath)
     await assert.rejects(
       new DeliveryTracker(store).deliver(
@@ -222,6 +222,19 @@ describe('DeliveryTracker の永続化', () => {
     const content = fs.readFileSync(filePath).toString()
     assert.ok(!content.includes('0312345678'))
     assert.ok(!content.includes('0398765432'))
+  })
+
+  it('保存ファイルは所有者のみが読み書きできる権限で作成する', async () => {
+    await assert.rejects(
+      new DeliveryTracker(new FileDeliveryStore(filePath)).deliver(
+        'call',
+        [createDestination(1).destination],
+        () => Promise.resolve('message'),
+        ['key-a']
+      )
+    )
+
+    assert.equal(fs.statSync(filePath).mode & 0o777, 0o600)
   })
 
   it('処理対象から外れた通話の配送状態は、保存されたものも破棄する', async () => {

@@ -12,6 +12,9 @@ export interface PersistedDelivery {
   progress: Record<string, string[]>
 }
 
+/** 保存するファイルの権限。Web Push の購読 endpoint を含むため、所有者のみ読み書きできるようにする */
+const FILE_MODE = 0o600
+
 /** 通話キーのハッシュをキーにした、永続化する配送状態 */
 export type PersistedDeliveries = Record<string, PersistedDelivery>
 
@@ -25,6 +28,10 @@ export interface DeliveryStore {
 
 /**
  * 文字列のハッシュ (SHA-256, 16 進数) を返す
+ *
+ * 電話番号などをファイルに平文で残さないために使う。入力の空間が小さい値 (電話番号など) は
+ * 総当たりで推測され得るため、秘匿を保証するものではない。保存先のファイルは、
+ * 電話番号一覧など他の機密と同様に `data/` 配下で管理し、公開しないこと。
  *
  * @param value ハッシュ化する文字列
  * @returns ハッシュ値
@@ -143,9 +150,9 @@ export class FileDeliveryStore implements DeliveryStore {
       const json = fs.readFileSync(this.filePath).toString()
       return parseDeliveries(JSON.parse(json))
     } catch (error) {
+      // JSON の解析エラーのメッセージには、ファイル内容の断片が含まれ得るため、種類だけを出力する
       Logger.configure('FileDeliveryStore.load').warn(
-        'Failed to load delivery state, treating as empty (duplicates may occur)',
-        error as Error
+        `Failed to load delivery state, treating as empty (duplicates may occur): ${error instanceof Error ? error.name : 'unknown error'}`
       )
       return {}
     }
@@ -164,7 +171,7 @@ export class FileDeliveryStore implements DeliveryStore {
       `.${path.basename(this.filePath)}.tmp`
     )
     try {
-      fs.writeFileSync(temporaryPath, json)
+      fs.writeFileSync(temporaryPath, json, { mode: FILE_MODE })
       fs.renameSync(temporaryPath, this.filePath)
     } catch {
       try {
@@ -172,7 +179,7 @@ export class FileDeliveryStore implements DeliveryStore {
       } catch {
         // 一時ファイルの後始末に失敗しても、直接書き込みを続行する
       }
-      fs.writeFileSync(this.filePath, json)
+      fs.writeFileSync(this.filePath, json, { mode: FILE_MODE })
     }
   }
 }
