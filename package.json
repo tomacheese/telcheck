@@ -22,6 +22,7 @@
     "fix:prettier": "prettier --write src",
     "preinstall": "npx only-allow pnpm",
     "start": "tsx ./src/main.ts",
+    "test": "node --import tsx --test \"src/**/*.test.ts\"",
     "dev": "tsx watch ./src/main.ts",
     "lint": "run-z lint:prettier,lint:eslint,lint:tsc",
     "lint:eslint": "eslint . -c eslint.config.mjs",

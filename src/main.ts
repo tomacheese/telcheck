@@ -5,6 +5,7 @@ import {
   IDestination,
   loadConfig,
 } from './utils/config'
+import { deliverCall } from './utils/deliver'
 import { getDestination } from './utils/destination'
 import { Logger } from '@book000/node-utils'
 import { NVR510, SyslogCall } from './utils/nvr510'
@@ -163,9 +164,6 @@ async function checker(config: Configuration) {
     }
     const selfName = getSelfName(config, callDetail)
     const destinationConfigs = getIDestinations(config, callDetail)
-    const destinations = destinationConfigs
-      ? destinationConfigs.map((d) => getDestination(d))
-      : []
 
     const callerName = getCallerName(callerResult)
     const source = callerResult ? callerResult.source : '不明'
@@ -189,11 +187,18 @@ async function checker(config: Configuration) {
           selfName
         )
 
-    if (!isFirst && destinations.length > 0) {
-      await Promise.all(destinations.map((d) => d.send(message)))
-    }
-
-    Checked.check(call.date, call.time)
+    // 一部の宛先が失敗した場合は例外が投げられ、通話は未処理のまま残る。
+    // 再試行時には、送信に成功済みの宛先を除いて配信される。
+    await deliverCall({
+      isFirst,
+      date: call.date,
+      time: call.time,
+      destinationConfigs: destinationConfigs ?? [],
+      createDestination: getDestination,
+      message,
+      store: Checked,
+      logger,
+    })
   }
 }
 
