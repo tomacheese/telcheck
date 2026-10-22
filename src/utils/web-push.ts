@@ -19,8 +19,61 @@ export interface Subscription {
   }
 }
 
+/** 送信結果の分類 */
+type DeliverResult =
+  | { kind: 'sent' | 'expired'; statusCode: number }
+  | { kind: 'transient' | 'permanent'; statusCode?: number }
+
+/**
+ * 再送すれば成功し得る HTTP ステータスコードか判定する
+ * @param statusCode HTTP ステータスコード
+ * @returns 5xx・429・408 の場合 true
+ */
+function isTransientStatusCode(statusCode: number): boolean {
+  return statusCode >= 500 || statusCode === 429 || statusCode === 408
+}
+
+/**
+ * 通信起因 (接続断・タイムアウト・名前解決失敗など) のエラーか判定する
+ *
+ * Node.js のネットワークエラーは `ECONNRESET` や `EHOSTUNREACH` のように `E` で始まる
+ * `code` を持つ (undici は `UND_ERR_*`)。`ERR_*` は Node.js の引数検証エラー、
+ * `code` を持たない Error は web-push の入力検証エラー (VAPID 設定不備など) のため、
+ * 再送しても成功しない失敗として扱う。
+ * @param error 捕捉したエラー
+ * @returns 通信起因のエラーの場合 true
+ */
+function isNetworkError(error: unknown): boolean {
+  if (!(error instanceof Error)) {
+    return false
+  }
+  if (error.name === 'AbortError' || error.name === 'TimeoutError') {
+    return true
+  }
+  const candidates = [error, (error as { cause?: unknown }).cause]
+  return candidates.some((candidate) => {
+    const code = (candidate as { code?: unknown } | undefined)?.code
+    return (
+      typeof code === 'string' &&
+      (code.startsWith('UND_ERR_') ||
+        (code.startsWith('E') && !code.startsWith('ERR_')))
+    )
+  })
+}
+
+/** 送信に失敗した通知の配送状態を保持する最大件数 */
+const MAX_PENDING_DELIVERIES = 100
+
 export class WebPush {
   private static instance: WebPush | null = null
+
+  /**
+   * 一時的な失敗で再送待ちの通知について、送信済みの購読 endpoint を保持する
+   *
+   * 宛先内の一部の購読だけが失敗した場合に、再送で成功済みの購読へ重複通知しないための状態。
+   * キーは宛先名とペイロード。プロセス内メモリのみで保持する。
+   */
+  private readonly deliveredEndpoints = new Map<string, Set<string>>()
 
   public readonly vapidPublicKey: string
   private readonly vapidPrivateKey: string
@@ -120,38 +173,72 @@ export class WebPush {
     fs.writeFileSync(subscriptionsPath, JSON.stringify(subscriptions, null, 2))
   }
 
-  public async sendNotification(
+  /**
+   * 1 件の購読へ送信し、結果を分類して返す
+   *
+   * - sent: 送信成功 (2xx)
+   * - expired: 購読の失効 (404・410)。購読情報を削除する
+   * - transient: 再送すれば成功し得る一時的な失敗 (5xx・429・408・通信エラー)
+   * - permanent: 再送しても成功しない失敗 (その他の 4xx・入力検証エラー等)
+   * @param subscription 送信先の購読情報
+   * @param payload 送信するペイロード
+   * @returns 分類結果と、判明している場合は HTTP ステータスコード
+   */
+  private async deliver(
     subscription: Subscription,
     payload: string
-  ): Promise<number> {
-    const logger = Logger.configure('WebPush.sendNotification')
-    const statusCode = await webpush
-      .sendNotification(subscription, payload, {
+  ): Promise<DeliverResult> {
+    const logger = Logger.configure('WebPush.deliver')
+    try {
+      const result = await webpush.sendNotification(subscription, payload, {
         vapidDetails: {
           subject: `mailto:${process.env.WEB_PUSH_EMAIL}`,
           publicKey: this.vapidPublicKey,
           privateKey: this.vapidPrivateKey,
         },
       })
-      .then((result) => result.statusCode)
-      .catch((error: unknown) => {
+      // web-push は 2xx 以外のレスポンスを WebPushError として reject する
+      return { kind: 'sent', statusCode: result.statusCode }
+    } catch (error: unknown) {
+      if (error instanceof WebPushError) {
         // 404・410 は購読が失効していることを示す想定内のレスポンスのため、
         // エラー扱いにせず購読情報を削除して以後の送信対象から除外する
-        if (
-          error instanceof WebPushError &&
-          (error.statusCode === 404 || error.statusCode === 410)
-        ) {
+        if (error.statusCode === 404 || error.statusCode === 410) {
           logger.warn(
             `Subscription is no longer valid, removing: ${new URL(subscription.endpoint).origin} (${subscription.destinationName})`
           )
           this.removeSubscriptionsByEndpoint(subscription.endpoint)
-          return error.statusCode
+          return { kind: 'expired', statusCode: error.statusCode }
         }
-        logger.error('Error sending notification', error as Error)
-        return undefined
-      })
+        logger.error('Error sending notification', error)
+        return {
+          kind: isTransientStatusCode(error.statusCode)
+            ? 'transient'
+            : 'permanent',
+          statusCode: error.statusCode,
+        }
+      }
+      logger.error('Error sending notification', error as Error)
+      return { kind: isNetworkError(error) ? 'transient' : 'permanent' }
+    }
+  }
 
-    return statusCode ?? 500
+  /**
+   * 1 件の購読へ送信する (購読 API 向け)
+   *
+   * 失敗しても例外は投げず、失効は 404・410、その他の失敗は 500 を返す。
+   * @param subscription 送信先の購読情報
+   * @param payload 送信するペイロード
+   * @returns HTTP ステータスコード
+   */
+  public async sendNotification(
+    subscription: Subscription,
+    payload: string
+  ): Promise<number> {
+    const result = await this.deliver(subscription, payload)
+    return result.kind === 'sent' || result.kind === 'expired'
+      ? result.statusCode
+      : 500
   }
 
   public async sendNotifications(
@@ -181,27 +268,49 @@ export class WebPush {
       },
     })
 
-    logger.info(
-      `Sending notification to ${destinationSubscriptions.length} subscriptions...`
+    const deliveryKey = `${destinationName}\n${payload}`
+    const delivered = this.deliveredEndpoints.get(deliveryKey) ?? new Set()
+    const targets = destinationSubscriptions.filter(
+      (s) => !delivered.has(s.endpoint)
     )
-    const promises = destinationSubscriptions.map((subscription) => {
-      return this.sendNotification(subscription, payload)
-    })
 
-    const results = await Promise.all(promises)
-    logger.info(
-      `Successfully sent notification to ${
-        results.filter((r) => r === 201).length
-      } subscriptions!`
+    logger.info(`Sending notification to ${targets.length} subscriptions...`)
+    const results = await Promise.all(
+      targets.map((subscription) => this.deliver(subscription, payload))
     )
-    // 404・410 は失効購読として sendNotification 側で既に処理済みのため、失敗数には含めない
-    const failureCount = results.filter(
-      (r) => r !== 201 && r !== 404 && r !== 410
-    ).length
-    if (failureCount > 0) {
+    const counts = { sent: 0, expired: 0, transient: 0, permanent: 0 }
+    for (const [index, result] of results.entries()) {
+      counts[result.kind]++
+      if (result.kind !== 'transient') {
+        delivered.add(targets[index].endpoint)
+      }
+    }
+    logger.info(
+      `Successfully sent notification to ${counts.sent} subscriptions!`
+    )
+    // 404・410 は失効購読として deliver 側で既に処理済みのため、失敗数には含めない
+    if (counts.permanent > 0) {
       logger.warn(
-        `Failed to send notification to ${failureCount} subscriptions.`
+        `Failed to send notification to ${counts.permanent} subscriptions (not retried).`
       )
     }
+
+    if (counts.transient === 0) {
+      this.deliveredEndpoints.delete(deliveryKey)
+      return
+    }
+    // 一時的な失敗は呼び出し元へ伝え、通知済みとして扱われないようにする。
+    // 再送時は成功済みの購読を除外する
+    this.deliveredEndpoints.delete(deliveryKey)
+    this.deliveredEndpoints.set(deliveryKey, delivered)
+    if (this.deliveredEndpoints.size > MAX_PENDING_DELIVERIES) {
+      const oldest = this.deliveredEndpoints.keys().next().value
+      if (oldest !== undefined) {
+        this.deliveredEndpoints.delete(oldest)
+      }
+    }
+    throw new Error(
+      `Failed to send web push notification to ${counts.transient} subscriptions (${destinationName})`
+    )
   }
 }
