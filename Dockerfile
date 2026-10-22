@@ -40,6 +40,7 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 ENV NODE_ENV=production
 ENV CONFIG_PATH=/data/config.json
 ENV CHECKED_PATH=/data/checked.json
+ENV DELIVERY_PATH=/data/delivery.json
 ENV PHONES_PATH=/data/phones.tsv
 ENV WEB_PUSH_KEY_PATH=/data/web-push-key.json
 ENV WEB_PUSH_SUBSCRIPTIONS_PATH=/data/web-push-subscriptions.json
