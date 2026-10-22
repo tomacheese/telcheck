@@ -48,9 +48,6 @@ pnpm start
 # Lint / 型チェック
 pnpm lint
 
-# テスト
-pnpm test
-
 # 自動修正
 pnpm fix
 
@@ -71,8 +68,8 @@ pnpm generate-schema
 - 非推奨: 共通ロジックの `src/web` への直接記述。
 
 ## テスト
-- テスト方針: Lint と型チェックに加え、`src/**/*.test.ts` に Node.js 標準の `node:test` で書いたテストを `pnpm test` で実行する。
-- 追加テスト: 新規のテストも `node:test` で書く。必要に応じて Vitest 等の導入を検討する。
+- テスト方針: Lint・型チェックに加え、`pnpm test`（Node 組み込みの `node:test` を `tsx` 経由で実行）で `src/**/*.test.ts` を検証する。
+- 追加テスト: 新規依存を増やさず `node:test` で書く。
 
 ## ドキュメント更新ルール
 - 設定変更時: `schema/Configuration.json` を `pnpm generate-schema` で更新する。

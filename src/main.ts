@@ -5,7 +5,7 @@ import {
   IDestination,
   loadConfig,
 } from './utils/config'
-import { deliverCall } from './utils/deliver'
+import { DeliveryTracker } from './utils/delivery'
 import { getDestination } from './utils/destination'
 import { Logger } from '@book000/node-utils'
 import { NVR510, SyslogCall } from './utils/nvr510'
@@ -121,6 +121,25 @@ function getGoogleSearchMessage(
   ].join('\n')
 }
 
+/** 通話ごとの配送状態。送信に失敗した宛先にだけ再送するためにループをまたいで保持する */
+const deliveryTracker = new DeliveryTracker()
+
+/**
+ * 通話を一意に識別するキーを返す
+ * @param call 通話情報
+ * @returns 通話キー
+ */
+function getCallKey(call: SyslogCall): string {
+  return [
+    call.date,
+    call.time,
+    call.direction,
+    call.fromNumber,
+    call.toNumber,
+    call.status,
+  ].join('|')
+}
+
 async function checker(config: Configuration) {
   const logger = Logger.configure('checker')
   logger.info('✨ checker()')
@@ -139,6 +158,9 @@ async function checker(config: Configuration) {
   logger.info(
     `📞 calls: ${calls.length}, filteredCalls: ${filteredCalls.length}`
   )
+  // ログから消えた通話の配送状態が残り続けないようにする
+  deliveryTracker.prune(new Set(filteredCalls.map((call) => getCallKey(call))))
+
   for (const call of filteredCalls.toReversed()) {
     const directionText = getDirectionText(call.direction)
     const connectedText = getStatusText(call.status, call.direction)
@@ -154,8 +176,6 @@ async function checker(config: Configuration) {
     const callerNumber =
       call.direction === 'incoming' ? call.fromNumber : call.toNumber
 
-    const callerResult = await searchNumber(config, callerNumber)
-
     const callDetail = {
       direction: call.direction,
       selfNumber,
@@ -164,41 +184,46 @@ async function checker(config: Configuration) {
     }
     const selfName = getSelfName(config, callDetail)
     const destinationConfigs = getIDestinations(config, callDetail)
+    const destinations = destinationConfigs
+      ? destinationConfigs.map((d) => getDestination(d))
+      : []
 
-    const callerName = getCallerName(callerResult)
-    const source = callerResult ? callerResult.source : '不明'
+    const createMessage = async () => {
+      const callerResult = await searchNumber(config, callerNumber)
+      const callerName = getCallerName(callerResult)
+      const source = callerResult ? callerResult.source : '不明'
 
-    const message = isGoogleSearchResult(callerResult)
-      ? getGoogleSearchMessage(
-          connectedText,
-          directionText,
-          callerNumber,
-          callerName,
-          source,
-          selfName,
-          callerResult
-        )
-      : getNotGoogleSearchMessage(
-          connectedText,
-          directionText,
-          callerNumber,
-          callerName,
-          source,
-          selfName
-        )
+      return isGoogleSearchResult(callerResult)
+        ? getGoogleSearchMessage(
+            connectedText,
+            directionText,
+            callerNumber,
+            callerName,
+            source,
+            selfName,
+            callerResult
+          )
+        : getNotGoogleSearchMessage(
+            connectedText,
+            directionText,
+            callerNumber,
+            callerName,
+            source,
+            selfName
+          )
+    }
 
-    // 一部の宛先が失敗した場合は例外が投げられ、通話は未処理のまま残る。
-    // 再試行時には、送信に成功済みの宛先を除いて配信される。
-    await deliverCall({
-      isFirst,
-      date: call.date,
-      time: call.time,
-      destinationConfigs: destinationConfigs ?? [],
-      createDestination: getDestination,
-      message,
-      store: Checked,
-      logger,
-    })
+    if (!isFirst && destinations.length > 0) {
+      // いずれかの宛先への送信に失敗した場合は例外が投げられ、通話は確認済みにならない。
+      // 次回のループで、送信に失敗した宛先にだけ再送する
+      await deliveryTracker.deliver(
+        getCallKey(call),
+        destinations,
+        createMessage
+      )
+    }
+
+    Checked.check(call.date, call.time)
   }
 }
 
@@ -233,8 +258,9 @@ async function main() {
     await checker(config)
       // eslint-disable-next-line @typescript-eslint/no-empty-function
       .then(() => {})
-      // eslint-disable-next-line @typescript-eslint/no-empty-function
-      .catch(() => {})
+      .catch((error: unknown) => {
+        logger.error('❌ checker() failed, will retry', error as Error)
+      })
     await new Promise((resolve) => setTimeout(resolve, 1000))
   }
 }
