@@ -7,6 +7,7 @@ import {
   deliverCall,
   getDestinationKeys,
 } from './deliver'
+import { getDestination } from './destination'
 
 const DATE = '2026/10/22'
 const TIME = '12:34:56'
@@ -301,6 +302,76 @@ void describe('deliverCall', () => {
 
     assert.ok(logger.logs.some((l) => l.includes('A (slack): boom')))
     assert.ok(logger.logs.every((l) => !l.includes('secret-token')))
+  })
+
+  void test('実際の URL 解析エラーでも、Webhook URL の秘密値をログに出力しない', async () => {
+    const store = new MemoryStore()
+    const logger = createLogger()
+    const config = {
+      type: 'slack',
+      // ポート番号が不正で、fetch() が URL 全体を含む解析エラーを投げる
+      webhook_url: 'https://hooks.slack.com:bad/services/FAKE-SECRET-TOKEN',
+      name: 'S',
+      condition: {},
+    } as unknown as IDestination
+
+    await assert.rejects(
+      deliverCall({
+        isFirst: false,
+        date: DATE,
+        time: TIME,
+        destinationConfigs: [config],
+        createDestination: getDestination,
+        message: 'm',
+        store,
+        logger,
+      })
+    )
+
+    assert.ok(
+      logger.logs.some((l) => l.includes('Failed to send to destination: S'))
+    )
+    assert.ok(logger.logs.every((l) => !l.includes('FAKE-SECRET-TOKEN')))
+  })
+
+  void test('URL に含まれないトークンや、設定に無い URL もログに出力しない', async () => {
+    const store = new MemoryStore()
+    const logger = createLogger()
+    const config = {
+      type: 'discord-bot',
+      token: 'FAKE-BOT-TOKEN',
+      channel_id: '123456789',
+      name: 'D',
+      condition: {},
+    } as unknown as IDestination
+    const createDestination = (): Sendable => ({
+      send: () =>
+        Promise.reject(
+          new Error(
+            'failed with FAKE-BOT-TOKEN at https://example.invalid/hook/OTHER-SECRET?x=1'
+          )
+        ),
+    })
+
+    await assert.rejects(
+      deliverCall({
+        isFirst: false,
+        date: DATE,
+        time: TIME,
+        destinationConfigs: [config],
+        createDestination,
+        message: 'm',
+        store,
+        logger,
+      })
+    )
+
+    assert.ok(logger.logs.some((l) => l.includes('D (discord-bot)')))
+    assert.ok(
+      logger.logs.every(
+        (l) => !l.includes('FAKE-BOT-TOKEN') && !l.includes('OTHER-SECRET')
+      )
+    )
   })
 })
 

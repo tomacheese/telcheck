@@ -81,8 +81,35 @@ export function getDestinationKeys(configs: IDestination[]): string[] {
   })
 }
 
-function getErrorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : String(error)
+/**
+ * ログに出力してよい形にエラーメッセージを整える
+ *
+ * `fetch()` の URL 解析エラーなどは、メッセージに元の URL 全体 (Webhook の秘密値を含む)
+ * を含むため、そのままログに出力しない。宛先設定の文字列値 (Webhook URL・トークンなど) を
+ * 伏せ字にした上で、残った URL 形式の文字列も伏せ字にする。
+ *
+ * @param error 捕捉したエラー
+ * @param config エラーが発生した宛先の設定
+ * @returns 機密値を除いたエラーメッセージ
+ */
+function getSafeErrorMessage(error: unknown, config: IDestination): string {
+  let message = error instanceof Error ? error.message : String(error)
+
+  const secrets = Object.entries(config)
+    .filter(
+      ([key, value]) =>
+        !['name', 'type', 'condition'].includes(key) &&
+        typeof value === 'string' &&
+        value.length > 0
+    )
+    .map(([, value]) => value as string)
+    // 長い値から置換し、他の値を含む値が部分的に残らないようにする
+    .toSorted((a, b) => b.length - a.length)
+  for (const secret of secrets) {
+    message = message.replaceAll(secret, '[REDACTED]')
+  }
+
+  return message.replaceAll(/https?:\/\/\S+/gi, '[REDACTED_URL]')
 }
 
 /**
@@ -132,7 +159,7 @@ export async function deliverCall(options: DeliverCallOptions): Promise<void> {
         await createDestination(config).send(message)
       } catch (error) {
         logger.error(
-          `❌ Failed to send to destination: ${config.name} (${config.type}): ${getErrorMessage(error)}`
+          `❌ Failed to send to destination: ${config.name} (${config.type}): ${getSafeErrorMessage(error, config)}`
         )
         throw error
       }
@@ -140,7 +167,7 @@ export async function deliverCall(options: DeliverCallOptions): Promise<void> {
         store.markDelivered(date, time, key)
       } catch (error) {
         logger.error(
-          `❌ Failed to record delivery for destination: ${config.name} (${config.type}): ${getErrorMessage(error)}`
+          `❌ Failed to record delivery for destination: ${config.name} (${config.type}): ${getSafeErrorMessage(error, config)}`
         )
         throw error
       }
