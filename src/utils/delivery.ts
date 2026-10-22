@@ -44,7 +44,7 @@ interface DeliveryState {
  */
 export class DeliveryTracker {
   private readonly states = new Map<string, DeliveryState>()
-  /** ストアから読み込んだ、まだこのプロセスで処理していない通話の配送状態 */
+  /** 現在処理中ではない通話の配送状態 (再起動前の未処理分と、配送が完了して prune 待ちの分) */
   private restored: PersistedDeliveries | undefined
 
   /**
@@ -88,7 +88,7 @@ export class DeliveryTracker {
    * 未配送の宛先へ送信する
    * @param key 通話キー
    * @param destinations 宛先 (同じ通話に対して常に同じ並びで渡すこと)
-   * @param createMessage メッセージを生成する関数。配送状態が無い場合にのみ呼ばれる
+   * @param createMessage メッセージを生成する関数。未配送の宛先があり、メッセージが未生成のときだけ呼ばれる
    * @param destinationKeys 宛先ごとの宛先キー (`destinations` と同じ並び)。
    *   ストアを使う場合に、配送状態を宛先に対応付けて永続化するために指定する
    * @throws 送信に失敗した宛先が 1 つ以上ある場合
@@ -108,7 +108,7 @@ export class DeliveryTracker {
         progress: new Map(),
         destinationKeys,
       }
-      // 保存済みの状態を先に反映し、未配送の宛先が残っている場合にだけメッセージを生成する
+      // 再起動前の配送状態を引き継ぐため、メッセージの生成より先に復元する
       this.restore(key, state)
     }
     const current = state
@@ -149,7 +149,7 @@ export class DeliveryTracker {
     }
 
     if (failures.length > 0) {
-      // 失敗した宛先の、宛先内の送信済み項目 (Web Push の購読など) も永続化する
+      // 一部の項目だけ送信できた状態で再起動しても、送信済みの項目へ重複して送らないため、失敗時にも保存する
       this.persist()
       throw new Error(
         `Failed to deliver to ${failures.length} destinations (${failures.join(', ')})`
@@ -161,8 +161,8 @@ export class DeliveryTracker {
   }
 
   /**
-   * ストアから読み込んだ配送状態を返す。初回のみストアから読み込む
-   * @returns まだこのプロセスで処理していない通話の配送状態
+   * 現在処理中ではない通話の配送状態を返す。初回のみストアから読み込む
+   * @returns 現在処理中ではない通話の配送状態
    */
   private getRestored(): PersistedDeliveries {
     this.restored ??= this.store ? this.store.load() : {}

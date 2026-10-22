@@ -132,15 +132,16 @@ class WebPushDestination extends BaseDestination {
   }
 }
 
-/** 伏せ字にする設定値の最小の長さ */
+/** 空文字などの極端に短い値で置換するとメッセージ全体が壊れるため、これ未満の値は伏せない */
 const MIN_SECRET_LENGTH = 8
 
 /**
  * ログに出力してよい形にエラーメッセージを整える
  *
- * `fetch()` の URL 解析エラーなどは、メッセージに元の URL 全体 (Webhook の秘密値を含む)
- * を含むため、そのままログに出力しない。宛先設定の文字列値 (Webhook URL・トークンなど) を
- * 伏せ字にした上で、残った URL 形式の文字列も伏せ字にする。
+ * `fetch()` の URL 解析エラーは、メッセージに元の URL 全体を含む。
+ * Webhook URL には秘密値が入っているため、そのままログに出力しない。
+ * 宛先設定の文字列値 (Webhook URL・トークンなど) を伏せ字にした上で、
+ * 残った URL 形式の文字列も伏せ字にする。
  *
  * @param error 捕捉したエラー
  * @param config エラーが発生した宛先の設定
@@ -157,7 +158,6 @@ export function sanitizeErrorMessage(
       ([key, value]) =>
         !['name', 'type', 'condition'].includes(key) &&
         typeof value === 'string' &&
-        // 短い値 (チャンネル ID など) は秘密値ではなく、伏せるとログが読めなくなる
         value.length >= MIN_SECRET_LENGTH
     )
     .map(([, value]) => value as string)

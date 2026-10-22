@@ -6,6 +6,13 @@ import { afterEach, beforeEach, describe, it } from 'node:test'
 import { IDestination } from './config'
 import { FileDeliveryStore, getDestinationKeys } from './delivery-store'
 
+/**
+ * テスト用の Slack 宛先設定を生成する
+ *
+ * @param name 宛先名
+ * @param url Webhook URL。省略時は name から生成したダミーの URL
+ * @returns 宛先の設定
+ */
 function createConfig(name: string, url = `https://example.invalid/${name}`) {
   return {
     type: 'slack',
@@ -63,6 +70,51 @@ describe('FileDeliveryStore', () => {
       ok: { delivered: ['a'], progress: { a: ['x'] } },
       noProgress: { delivered: ['a'], progress: {} },
     })
+  })
+
+  it('null など想定外の項目だけを読み飛ばし、他の有効な項目は残す', () => {
+    fs.writeFileSync(
+      filePath,
+      JSON.stringify({
+        ok: { delivered: ['a'], progress: {} },
+        nullEntry: null,
+        numberEntry: 1,
+      })
+    )
+
+    assert.deepEqual(new FileDeliveryStore(filePath).load(), {
+      ok: { delivered: ['a'], progress: {} },
+    })
+  })
+
+  it('既存のファイルが緩い権限でも、保存後は所有者のみが読み書きできる権限にする', () => {
+    fs.writeFileSync(filePath, '{}', { mode: 0o644 })
+    fs.chmodSync(filePath, 0o644)
+
+    new FileDeliveryStore(filePath).save({})
+
+    assert.equal(fs.statSync(filePath).mode & 0o777, 0o600)
+  })
+
+  it('緩い権限の一時ファイルが残っていても、保存後は所有者のみが読み書きできる権限にする', () => {
+    const temporaryPath = path.join(directory, '.delivery.json.tmp')
+    fs.writeFileSync(temporaryPath, 'stale', { mode: 0o644 })
+    fs.chmodSync(temporaryPath, 0o644)
+
+    new FileDeliveryStore(filePath).save({})
+
+    assert.equal(fs.statSync(filePath).mode & 0o777, 0o600)
+  })
+
+  it('直接書き込みにフォールバックした場合も、既存のファイルの権限を所有者のみにする', () => {
+    fs.writeFileSync(filePath, '{}', { mode: 0o644 })
+    fs.chmodSync(filePath, 0o644)
+    // 一時ファイルのパスがディレクトリで塞がれている状態を作る
+    fs.mkdirSync(path.join(directory, '.delivery.json.tmp'))
+
+    new FileDeliveryStore(filePath).save({})
+
+    assert.equal(fs.statSync(filePath).mode & 0o777, 0o600)
   })
 
   it('配列など想定外の形式は空として扱う', () => {

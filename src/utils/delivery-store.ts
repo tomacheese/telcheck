@@ -94,6 +94,23 @@ function isStringArray(value: unknown): value is string[] {
 }
 
 /**
+ * ログに出力するエラーの種類を返す
+ *
+ * JSON の解析エラーのメッセージにはファイル内容の断片が含まれ得るため、
+ * メッセージは含めず、名前と fs エラーの `code` (EACCES など) だけを返す。
+ *
+ * @param error 捕捉したエラー
+ * @returns エラーの名前と code
+ */
+function describeError(error: unknown): string {
+  if (!(error instanceof Error)) {
+    return 'unknown error'
+  }
+  const { code } = error as NodeJS.ErrnoException
+  return code ? `${error.name} (${code})` : error.name
+}
+
+/**
  * 読み込んだ値から、形式が正しい通話の配送状態だけを取り出す
  *
  * @param value JSON から読み込んだ値
@@ -105,6 +122,9 @@ function parseDeliveries(value: unknown): PersistedDeliveries {
     return result
   }
   for (const [key, entry] of Object.entries(value)) {
+    if (entry === null || typeof entry !== 'object') {
+      continue
+    }
     const { delivered, progress } = entry as {
       delivered?: unknown
       progress?: unknown
@@ -129,6 +149,9 @@ function parseDeliveries(value: unknown): PersistedDeliveries {
  * 配送状態を JSON ファイルに保存するストア
  */
 export class FileDeliveryStore implements DeliveryStore {
+  /** 直接書き込みへのフォールバックを警告済みか。毎回の保存で同じ警告を出さないための印 */
+  private warnedFallback = false
+
   /**
    * @param filePath 保存先のファイルパス
    */
@@ -150,19 +173,22 @@ export class FileDeliveryStore implements DeliveryStore {
       const json = fs.readFileSync(this.filePath).toString()
       return parseDeliveries(JSON.parse(json))
     } catch (error) {
-      // JSON の解析エラーのメッセージには、ファイル内容の断片が含まれ得るため、種類だけを出力する
       Logger.configure('FileDeliveryStore.load').warn(
-        `Failed to load delivery state, treating as empty (duplicates may occur): ${error instanceof Error ? error.name : 'unknown error'}`
+        `Failed to load delivery state, treating as empty (duplicates may occur): ${describeError(error)}`
       )
       return {}
     }
   }
 
   /**
+   * 配送状態を保存する
+   *
    * 書き込み中のクラッシュによる破損を避けるため、同一ディレクトリの一時ファイルに
    * 書き込んでから rename で置き換える。
    * ファイル単体を bind mount している場合などで rename できないときは、
    * 直接書き込む。
+   *
+   * @param deliveries 保存する配送状態
    */
   public save(deliveries: PersistedDeliveries): void {
     const json = JSON.stringify(deliveries)
@@ -172,14 +198,23 @@ export class FileDeliveryStore implements DeliveryStore {
     )
     try {
       fs.writeFileSync(temporaryPath, json, { mode: FILE_MODE })
+      // mode は新規作成時にしか効かないため、既存のファイルの権限も揃える
+      fs.chmodSync(temporaryPath, FILE_MODE)
       fs.renameSync(temporaryPath, this.filePath)
-    } catch {
+    } catch (error) {
       try {
         fs.rmSync(temporaryPath, { force: true })
       } catch {
         // 一時ファイルの後始末に失敗しても、直接書き込みを続行する
       }
+      if (!this.warnedFallback) {
+        this.warnedFallback = true
+        Logger.configure('FileDeliveryStore.save').warn(
+          `Failed to replace delivery state atomically, writing directly: ${describeError(error)}`
+        )
+      }
       fs.writeFileSync(this.filePath, json, { mode: FILE_MODE })
+      fs.chmodSync(this.filePath, FILE_MODE)
     }
   }
 }
