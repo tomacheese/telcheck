@@ -56,9 +56,9 @@ function getStatusText(
 }
 
 function getCallerName(callerResult: PhoneDetailResult) {
-  return !callerResult || !isPhoneDetail(callerResult)
-    ? '不明'
-    : callerResult.name
+  return callerResult && isPhoneDetail(callerResult)
+    ? callerResult.name
+    : '不明'
 }
 
 function getIDestinations(
