@@ -209,11 +209,7 @@ async function main() {
   unsubscribeButton.addEventListener('click', async () => {
     try {
       const result = await unsubscribe()
-      if (result) {
-        alert('通知を解除しました')
-      } else {
-        alert('通知の解除に失敗しました')
-      }
+      alert(result ? '通知を解除しました' : '通知の解除に失敗しました')
     } catch (error) {
       console.error(error)
       // @ts-expect-error error.message is not null
