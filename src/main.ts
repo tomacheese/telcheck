@@ -243,7 +243,6 @@ async function main() {
   const webPush = WebPush.getInstance()
 
   if (config.web) {
-    // start web server
     logger.info('🚀 Start web server')
     const app = await buildWebApp(config, webPush)
     const host = process.env.API_HOST ?? '0.0.0.0'

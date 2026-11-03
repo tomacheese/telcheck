@@ -38,7 +38,6 @@ export async function buildWebApp(config: Configuration, webPush: WebPush) {
     ? fs.readFileSync('version').toString().replace(/^v/, '').trim()
     : '0.0.0'
 
-  // routers
   const routers: BaseRouter[] = [
     new ApiRouter(app, config, webPush, version),
     new ViewRouter(app, config, webPush, version),

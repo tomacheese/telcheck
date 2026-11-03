@@ -21,11 +21,11 @@
         "DestinationDiscordBot": {
             "properties": {
                 "channel_id": {
-                    "description": "Discord channel ID",
+                    "description": "通知先の Discord チャンネル ID",
                     "type": "string"
                 },
                 "token": {
-                    "description": "Discord bot token",
+                    "description": "Discord Bot のトークン",
                     "type": "string"
                 },
                 "type": {
@@ -47,7 +47,7 @@
                     "type": "string"
                 },
                 "webhook_url": {
-                    "description": "Discord webhook URL",
+                    "description": "Discord Webhook URL",
                     "type": "string"
                 }
             },
@@ -60,7 +60,7 @@
         "DestinationLINENotify": {
             "properties": {
                 "token": {
-                    "description": "LINE Notify token",
+                    "description": "LINE Notify のトークン",
                     "type": "string"
                 },
                 "type": {
@@ -81,7 +81,7 @@
                     "type": "string"
                 },
                 "webhook_url": {
-                    "description": "Slack webhook URL",
+                    "description": "Slack Incoming Webhook URL",
                     "type": "string"
                 }
             },
@@ -114,10 +114,10 @@
                             "properties": {
                                 "condition": {
                                     "$ref": "#/definitions/Conditions",
-                                    "description": "Conditions for this destination (regex)"
+                                    "description": "この宛先へ通知する条件 (正規表現)"
                                 },
                                 "name": {
-                                    "description": "Destination name",
+                                    "description": "宛先名",
                                     "type": "string"
                                 }
                             },
@@ -138,10 +138,10 @@
                             "properties": {
                                 "condition": {
                                     "$ref": "#/definitions/Conditions",
-                                    "description": "Conditions for this destination (regex)"
+                                    "description": "この宛先へ通知する条件 (正規表現)"
                                 },
                                 "name": {
-                                    "description": "Destination name",
+                                    "description": "宛先名",
                                     "type": "string"
                                 }
                             },
@@ -162,10 +162,10 @@
                             "properties": {
                                 "condition": {
                                     "$ref": "#/definitions/Conditions",
-                                    "description": "Conditions for this destination (regex)"
+                                    "description": "この宛先へ通知する条件 (正規表現)"
                                 },
                                 "name": {
-                                    "description": "Destination name",
+                                    "description": "宛先名",
                                     "type": "string"
                                 }
                             },
@@ -186,10 +186,10 @@
                             "properties": {
                                 "condition": {
                                     "$ref": "#/definitions/Conditions",
-                                    "description": "Conditions for this destination (regex)"
+                                    "description": "この宛先へ通知する条件 (正規表現)"
                                 },
                                 "name": {
-                                    "description": "Destination name",
+                                    "description": "宛先名",
                                     "type": "string"
                                 }
                             },
@@ -210,10 +210,10 @@
                             "properties": {
                                 "condition": {
                                     "$ref": "#/definitions/Conditions",
-                                    "description": "Conditions for this destination (regex)"
+                                    "description": "この宛先へ通知する条件 (正規表現)"
                                 },
                                 "name": {
-                                    "description": "Destination name",
+                                    "description": "宛先名",
                                     "type": "string"
                                 }
                             },
@@ -231,10 +231,10 @@
             "properties": {
                 "condition": {
                     "$ref": "#/definitions/Conditions",
-                    "description": "Conditions for this self (regex)"
+                    "description": "この名前に該当する条件 (正規表現)"
                 },
                 "name": {
-                    "description": "Self name",
+                    "description": "自分の電話番号の名前",
                     "type": "string"
                 }
             },
@@ -255,11 +255,11 @@
         "google_search": {
             "properties": {
                 "cx": {
-                    "description": "Google Custom Search API CX",
+                    "description": "Google Custom Search の検索エンジン ID (CX)",
                     "type": "string"
                 },
                 "key": {
-                    "description": "Google Custom Search API key",
+                    "description": "Google Custom Search の API キー",
                     "type": "string"
                 }
             },
@@ -272,15 +272,15 @@
         "router": {
             "properties": {
                 "ip": {
-                    "description": "Router IP address",
+                    "description": "ルーターの IP アドレス",
                     "type": "string"
                 },
                 "password": {
-                    "description": "Router password",
+                    "description": "ルーターのパスワード",
                     "type": "string"
                 },
                 "username": {
-                    "description": "Router username",
+                    "description": "ルーターのユーザー名",
                     "type": "string"
                 }
             },
@@ -300,14 +300,14 @@
         "web": {
             "properties": {
                 "auth": {
-                    "description": "Web server auth",
+                    "description": "Web サーバーの認証設定",
                     "properties": {
                         "password": {
-                            "description": "Web server auth password",
+                            "description": "Web サーバーの認証パスワード",
                             "type": "string"
                         },
                         "username": {
-                            "description": "Web server auth username",
+                            "description": "Web サーバーの認証ユーザー名",
                             "type": "string"
                         }
                     },
