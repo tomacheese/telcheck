@@ -153,7 +153,6 @@ class GoogleSearch extends BaseSearchNumber {
 
   public async search(number: string): Promise<PhoneDetailResult> {
     if (!this.config.google_search) {
-      // Google search not configured
       return null
     }
 

@@ -12,27 +12,27 @@ export const PATH = {
 
 interface DestinationDiscordWebhook {
   type: 'discord-webhook'
-  /** Discord webhook URL */
+  /** Discord Webhook URL */
   webhook_url: string
 }
 
 interface DestinationDiscordBot {
   type: 'discord-bot'
-  /** Discord bot token */
+  /** Discord Bot のトークン */
   token: string
-  /** Discord channel ID */
+  /** 通知先の Discord チャンネル ID */
   channel_id: string
 }
 
 interface DestinationSlack {
   type: 'slack'
-  /** Slack webhook URL */
+  /** Slack Incoming Webhook URL */
   webhook_url: string
 }
 
 interface DestinationLINENotify {
   type: 'line-notify'
-  /** LINE Notify token */
+  /** LINE Notify のトークン */
   token: string
 }
 
@@ -58,16 +58,16 @@ export type IDestination = (
   | DestinationLINENotify
   | DestinationWebPush
 ) & {
-  /** Destination name */
+  /** 宛先名 */
   name: string
-  /** Conditions for this destination (regex) */
+  /** この宛先へ通知する条件 (正規表現) */
   condition: Conditions
 }
 
 interface Self {
-  /** Self name */
+  /** 自分の電話番号の名前 */
   name: string
-  /** Conditions for this self (regex) */
+  /** この名前に該当する条件 (正規表現) */
   condition: Conditions
 }
 
@@ -75,25 +75,25 @@ export interface Configuration {
   destinations: IDestination[]
   selfs: Self[]
   router: {
-    /** Router IP address */
+    /** ルーターの IP アドレス */
     ip: string
-    /** Router username */
+    /** ルーターのユーザー名 */
     username: string
-    /** Router password */
+    /** ルーターのパスワード */
     password: string
   }
   google_search?: {
-    /** Google Custom Search API key */
+    /** Google Custom Search の API キー */
     key: string
-    /** Google Custom Search API CX */
+    /** Google Custom Search の検索エンジン ID (CX) */
     cx: string
   }
   web?: {
-    /** Web server auth */
+    /** Web サーバーの認証設定 */
     auth: {
-      /** Web server auth username */
+      /** Web サーバーの認証ユーザー名 */
       username: string
-      /** Web server auth password */
+      /** Web サーバーの認証パスワード */
       password: string
     }
   }
