@@ -32,7 +32,7 @@
     "@book000/eslint-config": "1.16.125",
     "@book000/node-utils": "1.26.20",
     "@fastify/basic-auth": "6.3.1",
-    "@fastify/cors": "11.4.2",
+    "@fastify/cors": "11.4.3",
     "@types/cheerio": "1.0.0",
     "@types/node": "24.19.2",
     "@types/web-push": "3.6.4",
