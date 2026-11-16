@@ -173,7 +173,7 @@ async function checker(config: Configuration) {
     const connectedText = getStatusText(call.status, call.direction)
 
     logger.info(
-      `📞 ${directionText} ${call.fromNumber} -> ${call.toNumber} (${connectedText})`
+      `📞 ${directionText} ${call.date} ${call.time} (${connectedText})`
     )
 
     // 着信だったら、toNumber、発信だったら、fromNumber がこっち側の番号
