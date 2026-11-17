@@ -160,7 +160,7 @@ async function checker(config: Configuration) {
 
   const calls = await nvr510.getCallsFromSyslog()
   const filteredCalls = calls.filter(
-    (call) => !Checked.isChecked(call.date, call.time)
+    (call) => !Checked.isChecked(call.date, call.time, getCallKey(call))
   )
   logger.info(
     `📞 calls: ${calls.length}, filteredCalls: ${filteredCalls.length}`
@@ -231,7 +231,7 @@ async function checker(config: Configuration) {
       )
     }
 
-    Checked.check(call.date, call.time)
+    Checked.check(call.date, call.time, getCallKey(call))
   }
 }
 

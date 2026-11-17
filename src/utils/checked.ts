@@ -1,8 +1,10 @@
 import fs from 'node:fs'
 import { PATH } from './config'
+import { hash } from './delivery-store'
 
 interface IChecked {
   datetime: string
+  keys?: string[]
 }
 
 export class Checked {
@@ -11,25 +13,41 @@ export class Checked {
     return !fs.existsSync(path)
   }
 
-  public static isChecked(date: string, time: string): boolean {
+  public static isChecked(date: string, time: string, key: string): boolean {
     const checked = Checked.load()
     if (!checked) {
       return false
     }
     const previousDateObject = new Date(checked.datetime)
     const dateObject = this.convertDate(date, time)
-    return previousDateObject >= dateObject
+    return (
+      previousDateObject > dateObject ||
+      (previousDateObject.getTime() === dateObject.getTime() &&
+        (!checked.keys || checked.keys.includes(hash(key))))
+    )
   }
 
-  public static check(date: string, time: string): void {
+  public static check(date: string, time: string, key: string): void {
     const dateObject = this.convertDate(date, time)
     const previousChecked = Checked.load()
-    if (previousChecked && new Date(previousChecked.datetime) >= dateObject) {
+    if (previousChecked && new Date(previousChecked.datetime) > dateObject) {
+      return
+    }
+
+    if (
+      previousChecked &&
+      new Date(previousChecked.datetime).getTime() === dateObject.getTime()
+    ) {
+      if (!previousChecked.keys || previousChecked.keys.includes(hash(key)))
+        return
+      previousChecked.keys.push(hash(key))
+      Checked.save(previousChecked)
       return
     }
 
     Checked.save({
       datetime: dateObject.toISOString(),
+      keys: [hash(key)],
     })
   }
 
