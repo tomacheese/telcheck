@@ -68,7 +68,10 @@ export class WebPush {
   private readonly vapidPrivateKey: string
 
   private constructor() {
-    const keyPath = process.env.WEB_PUSH_KEY_PATH ?? 'data/web-push-key.json'
+    const keyPath =
+      process.env.WEB_PUSH_KEY_PATH ??
+      process.env.WEB_PUSH_KEY_FILE ??
+      'data/web-push-key.json'
     if (!fs.existsSync(keyPath)) {
       const vapidKeys = webpush.generateVAPIDKeys()
       fs.writeFileSync(

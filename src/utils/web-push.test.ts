@@ -65,7 +65,7 @@ describe('WebPush', () => {
 
   before(() => {
     directory = fs.mkdtempSync(path.join(os.tmpdir(), 'telcheck-web-push-'))
-    process.env.WEB_PUSH_KEY_PATH = path.join(directory, 'web-push-key.json')
+    process.env.WEB_PUSH_KEY_FILE = path.join(directory, 'web-push-key.json')
     subscriptionsPath = path.join(directory, 'subscriptions.json')
     process.env.WEB_PUSH_SUBSCRIPTIONS_PATH = subscriptionsPath
     process.env.WEB_PUSH_EMAIL = 'test@example.com'
@@ -235,6 +235,60 @@ describe('WebPush', () => {
       mock.restoreAll()
       mockSend([createNetworkError('ETIMEDOUT')])
       assert.equal(await webPush.sendNotification(subscription, '{}'), 500)
+    })
+  })
+
+  describe('鍵ファイルのパス', () => {
+    const keyEnvNames = ['WEB_PUSH_KEY_FILE', 'WEB_PUSH_KEY_PATH'] as const
+    let savedEnv: Record<string, string | undefined>
+    let savedInstance: unknown
+    let keyDirectory: string
+
+    beforeEach(() => {
+      savedEnv = Object.fromEntries(
+        keyEnvNames.map((name) => [name, process.env[name]])
+      )
+      savedInstance = Reflect.get(WebPush, 'instance')
+      keyDirectory = fs.mkdtempSync(path.join(directory, 'key-'))
+      for (const name of keyEnvNames) {
+        Reflect.deleteProperty(process.env, name)
+      }
+      Reflect.set(WebPush, 'instance', null)
+    })
+
+    afterEach(() => {
+      for (const name of keyEnvNames) {
+        if (savedEnv[name] === undefined) {
+          Reflect.deleteProperty(process.env, name)
+        } else {
+          process.env[name] = savedEnv[name]
+        }
+      }
+      Reflect.set(WebPush, 'instance', savedInstance)
+    })
+
+    it('WEB_PUSH_KEY_FILE のパスに鍵ファイルを作る', () => {
+      const filePath = path.join(keyDirectory, 'file.json')
+      process.env.WEB_PUSH_KEY_FILE = filePath
+      WebPush.getInstance()
+      assert.equal(fs.existsSync(filePath), true)
+    })
+
+    it('WEB_PUSH_KEY_FILE が未設定なら、旧 WEB_PUSH_KEY_PATH のパスに鍵ファイルを作る', () => {
+      const legacyPath = path.join(keyDirectory, 'legacy.json')
+      process.env.WEB_PUSH_KEY_PATH = legacyPath
+      WebPush.getInstance()
+      assert.equal(fs.existsSync(legacyPath), true)
+    })
+
+    it('両方設定されている場合は、実行時の上書きを守るため旧 WEB_PUSH_KEY_PATH を優先する', () => {
+      const filePath = path.join(keyDirectory, 'file.json')
+      const legacyPath = path.join(keyDirectory, 'legacy.json')
+      process.env.WEB_PUSH_KEY_FILE = filePath
+      process.env.WEB_PUSH_KEY_PATH = legacyPath
+      WebPush.getInstance()
+      assert.equal(fs.existsSync(legacyPath), true)
+      assert.equal(fs.existsSync(filePath), false)
     })
   })
 })
