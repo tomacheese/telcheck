@@ -1,4 +1,5 @@
 import fs from 'node:fs'
+import { atomicWriteFile } from './atomic-write'
 import { PATH } from './config'
 import { hash } from './delivery-store'
 
@@ -65,6 +66,6 @@ export class Checked {
 
   private static save(checked: IChecked): void {
     const json = JSON.stringify(checked)
-    fs.writeFileSync(PATH.CHECKED_FILE, json)
+    atomicWriteFile(PATH.CHECKED_FILE, json)
   }
 }

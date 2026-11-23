@@ -83,6 +83,18 @@ describe('WebPush', () => {
     mock.restoreAll()
   })
 
+  it('購読情報の置換に失敗しても以前の購読情報を保持する', (t) => {
+    const original = fs.readFileSync(subscriptionsPath, 'utf8')
+    t.mock.method(fs, 'renameSync', () => {
+      throw new Error('rename failed')
+    })
+    assert.throws(() => {
+      webPush.addSubscription(createSubscription('b'))
+    })
+    assert.equal(fs.readFileSync(subscriptionsPath, 'utf8'), original)
+    assert.equal(webPush.getSubscriptions().length, 1)
+  })
+
   describe('sendNotifications', () => {
     it('201 の場合は正常終了する', async () => {
       mockSend([201])

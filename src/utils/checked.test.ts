@@ -80,3 +80,41 @@ describe('同じ日時の通話の確認', () => {
     assert.equal(Checked.isChecked(date, '12:34:57', 'call-b'), true)
   })
 })
+
+describe('確認状態の保存失敗', () => {
+  it('途中まで書き込んで失敗しても以前の確認状態を読み取れる', (t) => {
+    const directory = fs.mkdtempSync(
+      path.join(os.tmpdir(), 'telcheck-checked-')
+    )
+    const originalPath = PATH.CHECKED_FILE
+    PATH.CHECKED_FILE = path.join(directory, 'checked.json')
+    try {
+      Checked.check('2026/10/22', '12:34:56', 'call-a')
+      const original = fs.readFileSync(PATH.CHECKED_FILE, 'utf8')
+      const writeFile = fs.writeFileSync
+      const mocked = t.mock.method(
+        fs,
+        'writeFileSync',
+        (
+          file: fs.PathOrFileDescriptor,
+          _data: string | NodeJS.ArrayBufferView,
+          options: fs.WriteFileOptions
+        ) => {
+          writeFile(file, '{"datetime', options)
+          throw new Error('disk full')
+        }
+      )
+      assert.throws(() => {
+        Checked.check('2026/10/22', '12:34:57', 'call-b')
+      })
+      mocked.mock.restore()
+      assert.equal(fs.readFileSync(PATH.CHECKED_FILE, 'utf8'), original)
+      assert.equal(Checked.isChecked('2026/10/22', '12:34:56', 'call-a'), true)
+      assert.equal(Checked.isChecked('2026/10/22', '12:34:57', 'call-b'), false)
+      assert.deepEqual(fs.readdirSync(directory), ['checked.json'])
+    } finally {
+      PATH.CHECKED_FILE = originalPath
+      fs.rmSync(directory, { recursive: true, force: true })
+    }
+  })
+})
