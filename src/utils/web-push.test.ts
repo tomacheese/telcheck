@@ -3,8 +3,9 @@ import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { afterEach, before, beforeEach, describe, it, mock } from 'node:test'
-import webpush, { WebPushError } from 'web-push'
+import { WebPushError } from 'web-push'
 import { Subscription, WebPush } from './web-push'
+import { webPushClient } from './web-push-client'
 
 const DESTINATION = 'test-destination'
 
@@ -37,7 +38,7 @@ function createNetworkError(code: string): Error {
  */
 function mockSend(results: (number | Error)[]) {
   let index = 0
-  return mock.method(webpush, 'sendNotification', () => {
+  return mock.method(webPushClient, 'sendNotification', () => {
     const result = results[Math.min(index, results.length - 1)]
     index++
     return result instanceof Error
@@ -97,8 +98,21 @@ describe('WebPush', () => {
 
   describe('sendNotifications', () => {
     it('201 の場合は正常終了する', async () => {
-      mockSend([201])
+      const send = mockSend([201])
       await webPush.sendNotifications(DESTINATION, 'title', body)
+      assert.equal(send.mock.callCount(), 1)
+      const [subscription, payload, options] = send.mock.calls[0].arguments
+      assert.deepEqual(subscription, createSubscription('a'))
+      assert.deepEqual(JSON.parse(payload as string), {
+        title: 'title',
+        body,
+        data: { url: 'https://google.com/search?q=undefined' },
+      })
+      assert.deepEqual(options?.vapidDetails, {
+        subject: 'mailto:test@example.com',
+        publicKey: webPush.getBase64PublicKey(),
+        privateKey: webPush.getVapidPrivateKey(),
+      })
     })
 
     it('5xx の場合は reject する', async () => {
@@ -174,7 +188,7 @@ describe('WebPush', () => {
       writeSubscriptions(['a', 'b', 'c'])
       const endpoints: string[] = []
       mock.method(
-        webpush,
+        webPushClient,
         'sendNotification',
         (subscription: { endpoint: string }) => {
           endpoints.push(subscription.endpoint)
@@ -199,7 +213,7 @@ describe('WebPush', () => {
       writeSubscriptions(['a', 'b'])
       const endpoints: string[] = []
       mock.method(
-        webpush,
+        webPushClient,
         'sendNotification',
         (subscription: { endpoint: string }) => {
           endpoints.push(subscription.endpoint)
@@ -279,11 +293,26 @@ describe('WebPush', () => {
       Reflect.set(WebPush, 'instance', savedInstance)
     })
 
-    it('WEB_PUSH_KEY_FILE のパスに鍵ファイルを作る', () => {
+    it('WEB_PUSH_KEY_FILE のパスに VAPID キーを生成し、次の初期化では再利用する', () => {
       const filePath = path.join(keyDirectory, 'file.json')
       process.env.WEB_PUSH_KEY_FILE = filePath
-      WebPush.getInstance()
+      const generate = mock.method(webPushClient, 'generateVAPIDKeys')
+      const instance = WebPush.getInstance()
       assert.equal(fs.existsSync(filePath), true)
+      assert.equal(
+        Buffer.from(instance.getBase64PublicKey(), 'base64url').length,
+        65
+      )
+      assert.equal(
+        Buffer.from(instance.getVapidPrivateKey(), 'base64url').length,
+        32
+      )
+      Reflect.set(WebPush, 'instance', null)
+      assert.equal(
+        WebPush.getInstance().getBase64PublicKey(),
+        instance.getBase64PublicKey()
+      )
+      assert.equal(generate.mock.callCount(), 1)
     })
 
     it('WEB_PUSH_KEY_FILE が未設定なら、旧 WEB_PUSH_KEY_PATH のパスに鍵ファイルを作る', () => {

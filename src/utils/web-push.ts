@@ -1,7 +1,8 @@
 import { Logger } from '@book000/node-utils'
 import fs from 'node:fs'
-import webpush, { WebPushError } from 'web-push'
+import { WebPushError } from 'web-push'
 import { atomicWriteFile } from './atomic-write'
+import { webPushClient } from './web-push-client'
 
 interface IWebPushKey {
   vapid: {
@@ -74,7 +75,7 @@ export class WebPush {
       process.env.WEB_PUSH_KEY_FILE ??
       'data/web-push-key.json'
     if (!fs.existsSync(keyPath)) {
-      const vapidKeys = webpush.generateVAPIDKeys()
+      const vapidKeys = webPushClient.generateVAPIDKeys()
       atomicWriteFile(
         keyPath,
         JSON.stringify(
@@ -183,13 +184,17 @@ export class WebPush {
   ): Promise<DeliverResult> {
     const logger = Logger.configure('WebPush.deliver')
     try {
-      const result = await webpush.sendNotification(subscription, payload, {
-        vapidDetails: {
-          subject: `mailto:${process.env.WEB_PUSH_EMAIL}`,
-          publicKey: this.vapidPublicKey,
-          privateKey: this.vapidPrivateKey,
-        },
-      })
+      const result = await webPushClient.sendNotification(
+        subscription,
+        payload,
+        {
+          vapidDetails: {
+            subject: `mailto:${process.env.WEB_PUSH_EMAIL}`,
+            publicKey: this.vapidPublicKey,
+            privateKey: this.vapidPrivateKey,
+          },
+        }
+      )
       // web-push は 2xx 以外のレスポンスを WebPushError として reject する
       return { kind: 'sent', statusCode: result.statusCode }
     } catch (error: unknown) {
