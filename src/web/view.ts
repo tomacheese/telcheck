@@ -1,6 +1,7 @@
 import { FastifyRequest, FastifyReply } from 'fastify'
 import { BaseRouter } from './base-router'
 import fs from 'node:fs'
+import pathModule from 'node:path'
 import { Logger } from '@book000/node-utils'
 
 export class ViewRouter extends BaseRouter {
@@ -33,7 +34,10 @@ export class ViewRouter extends BaseRouter {
     }
     const logger = Logger.configure('routeGet')
     logger.info(`⏩ Serving file: ${path}`)
-    if (!fs.existsSync(`./public/${path}`)) {
+    // tsx は package.json の設定に従って CommonJS として実行する。
+    // eslint-disable-next-line unicorn/prefer-module
+    const filePath = pathModule.join(__dirname, '../public', path)
+    if (!fs.existsSync(filePath)) {
       await reply.code(404).send()
       return
     }
@@ -48,16 +52,16 @@ export class ViewRouter extends BaseRouter {
       icon: 'image/x-icon',
       json: 'application/json',
     }
-    await reply.header('Content-Type', contentTypes[extension] || 'text/plain')
+    reply.header('Content-Type', contentTypes[extension] || 'text/plain')
     if (extension === 'html') {
       await reply.send(
         fs
-          .readFileSync(`./public/${path}`)
+          .readFileSync(filePath)
           .toString()
           .replaceAll('{{VERSION}}', () => this.version)
       )
       return
     }
-    await reply.send(fs.readFileSync(`./public/${path}`))
+    await reply.send(fs.readFileSync(filePath))
   }
 }
