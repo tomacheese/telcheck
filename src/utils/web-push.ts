@@ -1,6 +1,7 @@
 import { Logger } from '@book000/node-utils'
 import fs from 'node:fs'
 import webpush, { WebPushError } from 'web-push'
+import { atomicWriteFile } from './atomic-write'
 
 interface IWebPushKey {
   vapid: {
@@ -74,7 +75,7 @@ export class WebPush {
       'data/web-push-key.json'
     if (!fs.existsSync(keyPath)) {
       const vapidKeys = webpush.generateVAPIDKeys()
-      fs.writeFileSync(
+      atomicWriteFile(
         keyPath,
         JSON.stringify(
           {
@@ -162,7 +163,7 @@ export class WebPush {
   private saveSubscriptions(subscriptions: Subscription[]): void {
     const subscriptionsPath =
       process.env.WEB_PUSH_SUBSCRIPTIONS_PATH ?? 'data/subscriptions.json'
-    fs.writeFileSync(subscriptionsPath, JSON.stringify(subscriptions, null, 2))
+    atomicWriteFile(subscriptionsPath, JSON.stringify(subscriptions, null, 2))
   }
 
   /**
