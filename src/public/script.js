@@ -1,12 +1,7 @@
 /* global alert */
 
 async function isWebPushSupported() {
-  // グローバル空間にNotificationがあればNotification APIに対応しているとみなす
-  if (!('Notification' in globalThis)) {
-    return false
-  }
-  // グローバル変数navigatorにserviceWorkerプロパティがあればサービスワーカーに対応しているとみなす
-  if (!('serviceWorker' in navigator)) {
+  if (!('Notification' in globalThis) || !('serviceWorker' in navigator)) {
     return false
   }
   try {
