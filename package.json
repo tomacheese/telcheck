@@ -34,7 +34,7 @@
     "@fastify/basic-auth": "6.3.1",
     "@fastify/cors": "11.4.3",
     "@types/cheerio": "1.0.0",
-    "@types/node": "24.19.3",
+    "@types/node": "24.19.4",
     "@types/web-push": "3.6.4",
     "cheerio": "1.2.0",
     "eslint": "10.15.0",
